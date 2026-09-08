@@ -1,0 +1,186 @@
+{
+  "user_id": "161173db-ce88-451b-b6ae-760d2a46a797",
+  "plugin_version": "0.6.1",
+  "prompts": [
+    {
+      "entry_id": "b72bc0fa0af164f458e69a2a81df88ec00e77bc6",
+      "timestamp": "2026-07-08T06:16:08.245Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 123,
+        "output_tokens": 22,
+        "reasoning_tokens": 31,
+        "cache_read_tokens": 13056,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.000587772
+    },
+    {
+      "entry_id": "17b83c07820134b5f3708b096d8672c1cea2716d",
+      "timestamp": "2026-07-08T06:13:57.204Z",
+      "session_id": "ses_0bfa3832fffeKqnQlx4rPy3Fn7",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 5626,
+        "output_tokens": 468,
+        "reasoning_tokens": 10,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.01145268
+    },
+    {
+      "entry_id": "83032f238864775d91a58ba3d868c2f254bf013c",
+      "timestamp": "2026-07-08T06:14:01.065Z",
+      "session_id": "ses_0bfa3832fffeKqnQlx4rPy3Fn7",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 218,
+        "output_tokens": 152,
+        "reasoning_tokens": 47,
+        "cache_read_tokens": 6016,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.001159072
+    },
+    {
+      "entry_id": "aed47790be24124f10df9a2e8d1ad206ec657dd7",
+      "timestamp": "2026-07-08T06:14:17.474Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 37,
+        "output_tokens": 160,
+        "reasoning_tokens": 30,
+        "cache_read_tokens": 11136,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.000887052
+    },
+    {
+      "entry_id": "5c56f82146b631e3370c0debdbf0527f7c36381b",
+      "timestamp": "2026-07-08T06:14:24.376Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 359,
+        "output_tokens": 164,
+        "reasoning_tokens": 24,
+        "cache_read_tokens": 12416,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.001458932
+    },
+    {
+      "entry_id": "ecb01e631c6be489d9373a64b06f4b857a9a268a",
+      "timestamp": "2026-07-08T06:14:20.910Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 1054,
+        "output_tokens": 66,
+        "reasoning_tokens": 70,
+        "cache_read_tokens": 11264,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.002470568
+    },
+    {
+      "entry_id": "43ac42692a35309dec2a7053c9ab16cfaf36b303",
+      "timestamp": "2026-07-08T06:14:29.781Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 29,
+        "output_tokens": 33,
+        "reasoning_tokens": 23,
+        "cache_read_tokens": 13056,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.000434652
+    },
+    {
+      "entry_id": "8182f7918ae374959bd2cb3012934433898e8f18",
+      "timestamp": "2026-07-08T06:18:11.877Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 367,
+        "output_tokens": 133,
+        "reasoning_tokens": 222,
+        "cache_read_tokens": 13056,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.002063292
+    },
+    {
+      "entry_id": "2eda380f92d08c3010d0ead75b20615a27fd3bc4",
+      "timestamp": "2026-07-08T06:14:06.352Z",
+      "session_id": "ses_0bfa3832fffeKqnQlx4rPy3Fn7",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 424,
+        "output_tokens": 241,
+        "reasoning_tokens": 64,
+        "cache_read_tokens": 6400,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.00189196
+    },
+    {
+      "entry_id": "e2f86024b6b482d3b436c6666ad93d1aff67cc1e",
+      "timestamp": "2026-07-08T06:14:27.059Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 50,
+        "output_tokens": 84,
+        "reasoning_tokens": 9,
+        "cache_read_tokens": 12928,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.000598096
+    },
+    {
+      "entry_id": "29684db4ed03e11298d1f9c4c235da2587ff2bca",
+      "timestamp": "2026-07-08T06:12:20.365Z",
+      "session_id": "ses_0bfa4f297ffezxUq1Ywnpw9SEu",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 11151,
+        "output_tokens": 3,
+        "reasoning_tokens": 20,
+        "cache_read_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.01948278
+    },
+    {
+      "entry_id": "bd2ef24183036833bc223e285dbbe64578864bea",
+      "timestamp": "2026-07-08T06:14:17.368Z",
+      "session_id": "ses_0bfa3832fffeKqnQlx4rPy3Fn7",
+      "model": "deepseek-v4-pro",
+      "provider": "opencode-go",
+      "usage": {
+        "input_tokens": 947,
+        "output_tokens": 907,
+        "reasoning_tokens": 19,
+        "cache_read_tokens": 7040,
+        "cache_write_tokens": 0
+      },
+      "cost": 0.00497234
+    }
+  ]
+}

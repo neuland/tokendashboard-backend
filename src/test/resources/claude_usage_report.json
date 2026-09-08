@@ -1,0 +1,66 @@
+{
+  "user_id": "d7259ce3-99ba-446a-8d88-137fdf0eadfe",
+  "plugin_version": "0.6.1",
+  "prompts": [
+    {
+      "timestamp": "2026-06-16T08:04:06.191Z",
+      "entry_id": "a506b164-90ee-460d-9c55-f12ef6846f01",
+      "session_id": "a506b164-90ee-460d-9c55-f12ef6846f08",
+      "model": "claude-sonnet-4-6",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 15474,
+        "cache_creation_input_tokens": 45445,
+        "cache_read_input_tokens": 606999
+      }
+    },
+    {
+      "timestamp": "2026-06-16T08:14:06.191Z",
+      "entry_id": "a506b164-90ee-460d-9c55-f12ef6846f02",
+      "session_id": "a506b164-90ee-460d-9c55-f12ef6846f08",
+      "model": "claude-sonnet-4-6",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 15474,
+        "cache_creation_input_tokens": 45445,
+        "cache_read_input_tokens": 606999
+      }
+    },
+    {
+      "timestamp": "2026-06-16T08:14:56.191Z",
+      "entry_id": "a506b164-90ee-460d-9c55-f12ef6846f03",
+      "session_id": "a506b264-90ee-460d-9c55-f12ef6846f08",
+      "model": "claude-sonnet-4-6",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 15474,
+        "cache_creation_input_tokens": 45445,
+        "cache_read_input_tokens": 606999
+      }
+    },
+    {
+      "timestamp": "2026-06-16T08:24:06.191Z",
+      "entry_id": "a506b164-90ee-460d-9c55-f12ef6846f04",
+      "session_id": "a506b165-90ee-460d-9c55-f12ef6846f08",
+      "model": "claude-sonnet-4-6",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 15474,
+        "cache_creation_input_tokens": 45445,
+        "cache_read_input_tokens": 606999
+      }
+    },
+    {
+      "timestamp": "2026-06-16T08:26:06.191Z",
+      "entry_id": "a506b164-90ee-460d-9c55-f12ef6846f05",
+      "session_id": "a506b164-90ee-560d-9c55-f12ef6846f08",
+      "model": "claude-sonnet-4-6",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 15474,
+        "cache_creation_input_tokens": 45445,
+        "cache_read_input_tokens": 606999
+      }
+    }
+  ]
+}

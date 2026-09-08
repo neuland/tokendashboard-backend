@@ -1,0 +1,15 @@
+name: tokendashboard-backend-dev
+services:
+  dev:
+    build:
+      context: .
+    container_name: tokendashboard-backend-dev
+    hostname: dev
+    volumes:
+      - ..:/workspaces/tokendashboard
+      - ~/.claude:/home/vscode/.claude
+      - ~/.claude.json:/tmp/host-claude.json:ro
+    environment:
+      - NODE_ENV=development
+    command: sleep infinity
+    restart: unless-stopped

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tokendashboard-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tokendashboard-backend
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: tokendashboard-backend
+    spec:
+      imagePullSecrets:
+        - name: my-registry-token
+      containers:
+        - name: tokendashboard-backend
+          image: my-registry.example.com/tokendashboard-backend:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          env:
+            - name: DATABASE_URL
+              value: "jdbc:postgresql://tokendashboard-postgres-service:5432/tokendashboard"
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: tokendashboard-postgres-secret
+                  key: POSTGRES_USER
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tokendashboard-postgres-secret
+                  key: POSTGRES_PASSWORD

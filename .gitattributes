@@ -1,0 +1,7 @@
+# Line endings are pinned per file type so a contributor's core.autocrlf
+# setting cannot flip them. The Gradle wrapper is the reason: gradlew.bat
+# is only a valid batch file with CRLF, gradlew only a valid shell script
+# with LF.
+*.bat   text eol=crlf
+*.sh    text eol=lf
+gradlew text eol=lf

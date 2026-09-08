@@ -1,0 +1,9 @@
+---
+namespace: my-namespace
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - postgres/postgres-pvc.yaml
+  - postgres/postgres-deployment-service.yaml
+  - postgres/postgres-secret.yaml

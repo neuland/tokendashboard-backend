@@ -1,0 +1,44 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:sha-$CI_COMMIT_SHORT_SHA
+
+test_backend:
+  stage: test
+  image: eclipse-temurin:25-jdk
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+  variables:
+    POSTGRES_DB: testdb
+    POSTGRES_USER: test
+    POSTGRES_PASSWORD: test
+    POSTGRES_HOST: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
+  script:
+    - ./gradlew ktlintCheck --no-daemon
+    - ./gradlew test --no-daemon
+
+build_backend:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+
+deploy_to_k8s:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - cd kustomize
+    - envsubst '${DB_USER},${DB_PASSWORD}' < postgres/postgres-secret.yaml.tmpl > postgres/postgres-secret.yaml
+    - kustomize edit set image tokendashboard-backend=$CI_REGISTRY_IMAGE:sha-$CI_COMMIT_SHORT_SHA
+    - kubectl apply -k .
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

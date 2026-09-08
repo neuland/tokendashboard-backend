@@ -1,0 +1,28 @@
+{
+    "name": "Tokendashboard - devcontainer",
+    "dockerComposeFile": "docker-compose.yaml",
+    "service": "dev",
+    "runServices": ["dev"],
+    "workspaceFolder": "/workspaces/tokendashboard",
+    "initializeCommand": "${localWorkspaceFolder}/.devcontainer/init.sh",
+    "overrideCommand": true,
+    "features": {
+        "ghcr.io/devcontainers/features/node:2.0.0": {
+            "version": "24"
+        },
+        "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {},
+        "ghcr.io/devcontainers/features/java:1": {},
+        "ghcr.io/devcontainers-extra/features/gradle-sdkman:2": {}
+    },
+    "remoteUser": "vscode",
+    "updateRemoteUserUID": true,
+    "shutdownAction": "stopCompose",
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "customizations": {
+        "jetbrains": {
+            "backend": "IntelliJ",
+            "settings" : {},
+            "plugins" : []
+        }
+    }
+}
