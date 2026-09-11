@@ -45,8 +45,12 @@ For internal reporting, we use the slightly conservative rounded value of 840 g 
 The study neither reports nor models prompt-caching activities separately.
 Since our agentic coding workloads frequently reuse large repository contexts, we additionally account for the cache-write and cache-read tokens reported by the CLI tools.
 These token categories are converted into output-equivalent tokens using our own approximation factors.
-We assign cache-write tokens a weight of 1.25 times the input-token factor and cache-read tokens a weight of 1% of the input-token factor.
-These weights are based on the pricing ratios of the Claude API and should be understood as pragmatic approximations rather than physically derived energy factors.
+Cache-write tokens start from the pricing ratio and are weighted at 1.25 times the input-token factor, matching the API's pricing.
+Cache-read tokens are priced by the API at 10% of the input-token cost, but we deliberately deviate from this ratio and use 1% instead.
+Reading from cache is computationally much cheaper than a fresh forward pass over the same tokens — closer to a lookup than to inference — so the pricing ratio, 
+which reflects the provider's cost structure, overstates the actual compute (and thus energy) involved.
+Using the pricing ratio here would also penalise caching itself, even though caching is exactly the behaviour we want to encourage, since it avoids recomputation.
+The 1% figure is therefore our own conservative approximation.
 For models other than Sonnet, we estimate relative CO₂ factors using the pricing ratios of the Claude API.
 This includes models such as Claude Opus, Claude Haiku, and Claude Fable.
 We deliberately use a consistent pricing-based scaling instead of adopting the published estimates for individual models directly.
