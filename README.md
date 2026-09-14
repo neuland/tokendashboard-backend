@@ -1,9 +1,18 @@
 # TokenDashboard
 
-Backend for visualising the company's token usage across providers (Claude
-Code, GitHub Copilot, OpenCode). See [CLAUDE.md](CLAUDE.md) for architecture,
-DDD, and code style docs, and [docs/decisions.md](docs/decisions.md) for
-business/domain decisions.
+Part of a system that measures a company's token usage. 
+It requires the backend, the frontend and at least one plugin that sends the data.  
+This is the backend repository.  
+The frontend can be found here:  
+https://github.com/neuland/tokendashboard-frontend  
+and the plugins here:  
+Claude: https://github.com/neuland/tokendashboard-plugin-claude  
+Copilot: https://github.com/neuland/tokendashboard-plugin-copilot  
+OpenCode: https://github.com/neuland/tokendashboard-plugin-opencode  
+
+## Documentation
+See [CLAUDE.md](CLAUDE.md) for architecture, DDD, and code style docs, 
+and [docs/decisions.md](docs/decisions.md) for business/domain decisions.
 
 ## No authentication, no user/team attribution
 
