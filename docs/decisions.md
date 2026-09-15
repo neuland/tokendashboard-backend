@@ -275,3 +275,32 @@ start re-sending open sessions, the conflict key here must widen to include
 a per-prompt identifier *first*, before that plugin change ships. Nothing in
 the plugin's own repository currently hints that this backend assumption
 exists.
+
+## 15. Total tokens count input and output only; cache tokens are shown separately
+
+The headline "total tokens" figure — company-wide and per provider — sums
+input and output tokens. Cache-write and cache-read tokens are excluded from
+it, but stored and shown separately: in the breakdown by token type, in the
+per-model table and as their own chart views.
+
+Why: agentic coding re-reads large repository contexts thousands of times, so
+cache reads outnumber input and output by one to two orders of magnitude.
+Summed into one figure they would push the total into an extreme range,
+flatten real fluctuations into noise and make the figure incomparable over
+time. Excluding them keeps the total meaningful; keeping them visible
+elsewhere means nothing is dropped.
+
+## 16. Copilot cost is approximated at one US cent per AI unit
+
+Copilot cost is computed as 1 US cent per AI unit, from the AI-unit total
+the Copilot CLI reports per session (stored as `NanoAiu`, see decision 12).
+
+Why: GitHub's pricing communication is ambiguous. One cent per AI *credit*
+(not unit) is documented only for the credit-based plans, which are
+deprecated; precise pricing for the usage-based plans is not yet available.
+Until it is, the approximation is used and labelled as such in the
+dashboard's FAQ. Storing the raw AI units keeps the quantity intact for a
+later, exact conversion — or for a CO₂ factor per AI unit, should one become
+available — and the historical data can then be recomputed.
+
+
