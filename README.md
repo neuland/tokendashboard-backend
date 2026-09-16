@@ -32,51 +32,18 @@ Anyone who can reach the service can submit usage data and read all
 aggregates, so the network boundary is the entire access control. See
 [SECURITY.md](SECURITY.md) for the full security model.
 
-## Derivation of CO₂ factors for Claude
+## CO₂ factors
 
-The CO₂ factors used in this project are based on the study
-*How Hungry is AI? Benchmarking Energy, Water, and Carbon Footprint of LLM Inference* by Jegham et al.
-The study does not directly measure the electricity consumption of commercial large language models.
-Instead, it estimates the energy consumption of standardised inference requests by combining measured response times with an infrastructure model.
-This model incorporates publicly available information about data centres together with assumptions regarding the underlying hardware, system utilisation, and request batching.
+CO₂ figures shown in the dashboard are rough order-of-magnitude estimates,
+not measured emission factors.
+See [docs/CO2_METHODOLOGY.md](docs/CO2_METHODOLOGY.md) for the full derivation
+and its assumptions.
 
-For our internal order-of-magnitude estimate, we use a factor of **840 g CO₂e per million output-equivalent tokens**.
+## Token coverage
 
-This factor is derived from the study's long-context benchmark for Claude 3.7 Sonnet, consisting of 10,000 input tokens and 1,500 output tokens.
-For this scenario, Jegham et al. estimate an energy consumption of 5.671 Wh.
-Using the emission factor of 0.287 kg CO₂e/kWh applied in the study, this corresponds to approximately 1.628 g CO₂e per request.
-
-For our simplified token model, we weight one input token as one-twentieth of an output token.
-Under this assumption, the reference scenario corresponds to 2,000 output-equivalent tokens, yielding approximately 814 g CO₂e per million output-equivalent tokens.
-Taking into account the uncertainty reported by Jegham et al. for the estimated energy consumption, this corresponds to a range of approximately 771 to 857 g CO₂e per million output-equivalent tokens.
-For internal reporting, we use the slightly conservative rounded value of 840 g CO₂e per million output-equivalent tokens.
-
-The study neither reports nor models prompt-caching activities separately.
-Since our agentic coding workloads frequently reuse large repository contexts, we additionally account for the cache-write and cache-read tokens reported by the CLI tools.
-These token categories are converted into output-equivalent tokens using our own approximation factors.
-Cache-write tokens start from the pricing ratio and are weighted at 1.25 times the input-token factor, matching the API's pricing.
-Cache-read tokens are priced by the API at 10% of the input-token cost, but we deliberately deviate from this ratio and use 1% instead.
-Reading from cache is computationally much cheaper than a fresh forward pass over the same tokens — closer to a lookup than to inference — so the pricing ratio, 
-which reflects the provider's cost structure, overstates the actual compute (and thus energy) involved.
-Using the pricing ratio here would also penalise caching itself, even though caching is exactly the behaviour we want to encourage, since it avoids recomputation.
-The 1% figure is therefore our own conservative approximation.
-For models other than Sonnet, we estimate relative CO₂ factors using the pricing ratios of the Claude API.
-This includes models such as Claude Opus, Claude Haiku, and Claude Fable.
-We deliberately use a consistent pricing-based scaling instead of adopting the published estimates for individual models directly.
-
-The factors presented here are intended solely for internal order-of-magnitude estimation.
-They are not measured emission factors and are not suitable for formal greenhouse gas accounting.
-The resulting model combines the infrastructure assumptions described by Jegham et al. with our own assumptions regarding the relative weighting of different token categories.
-
-### GPT / Copilot
-
-No CO₂ factors for GPT models. Token counting infrastructure exists; CO₂
-figures need to be derived and added separately.
-
-### OpenCode
-
-No CO₂ factors yet. Coverage is added per model as needed, not upfront —
-too many models to maintain factors for all of them.
+Token totals are lower bounds: each plugin has known gaps in what it
+captures. See [docs/TOKEN_COVERAGE.md](docs/TOKEN_COVERAGE.md) for the
+known mechanisms per plugin.
 
 ## Claude prices endpoint for plugins
 
