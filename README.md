@@ -36,13 +36,13 @@ aggregates, so the network boundary is the entire access control. See
 
 CO₂ figures shown in the dashboard are rough order-of-magnitude estimates,
 not measured emission factors.
-See [docs/CO2_METHODOLOGY.md](docs/CO2_METHODOLOGY.md) for the full derivation
+See [docs/co2-methodology.md](docs/co2-methodology.md) for the full derivation
 and its assumptions.
 
-## Token coverage
+## Known gaps in token coverage
 
 Token totals are lower bounds: each plugin has known gaps in what it
-captures. See [docs/TOKEN_COVERAGE.md](docs/TOKEN_COVERAGE.md) for the
+captures. See [docs/known-gaps.md](docs/known-gaps.md) for the
 known mechanisms per plugin.
 
 ## Claude prices endpoint for plugins

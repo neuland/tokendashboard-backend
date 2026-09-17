@@ -24,7 +24,7 @@ even though they don't directly contribute to cost:
 
 ## 3. Derivation of CO₂ factors
 
-See CO2_METHODOLOGY.md.
+See co2-methodology.md.
 
 ## 4. No authentication, no user/team attribution
 
