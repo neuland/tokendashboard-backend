@@ -144,6 +144,27 @@ class ClaudeUsageIntegrationTest :
             }
         }
 
+        test("resubmitting a known prompt with different token counts keeps the max per column") {
+            val jdbi = db.buildJdbi()
+
+            testApplication {
+                configureIntegrationTestApp(jdbi, juneTimeFactory)
+                val jsonClient = createClient { install(ClientContentNegotiation) { json() } }
+
+                postClaudeConflictInitial(jsonClient).status shouldBe HttpStatusCode.Created
+                postClaudeConflictUpdated(jsonClient).status shouldBe HttpStatusCode.Created
+
+                val result =
+                    jsonClient.get("/api/usage/claude/v1?from=2026-06-20&to=2026-06-20").body<ProviderPluginUsageDto>()
+
+                val sonnet = result.family("sonnet")
+                sonnet.tokens.inputTokens shouldBe 2000 // second report was higher
+                sonnet.tokens.outputTokens shouldBe 5000 // first report was higher
+                sonnet.tokens.cacheWriteTokens shouldBe 300 // first report was higher
+                sonnet.tokens.cacheReadTokens shouldBe 900 // second report was higher
+            }
+        }
+
         test("plugin_version is persisted") {
             val jdbi = db.buildJdbi()
 
