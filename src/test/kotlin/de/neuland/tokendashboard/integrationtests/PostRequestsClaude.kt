@@ -173,24 +173,52 @@ suspend fun postClaudeJune15Second(client: HttpClient): HttpResponse =
         )
     }
 
-suspend fun postClaudeWithoutPluginVersion(client: HttpClient): HttpResponse =
+suspend fun postClaudeConflictInitial(client: HttpClient): HttpResponse =
     client.post("/api/usage/ingest/claude") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         setBody(
             """
             {
               "user_id": "user1",
+              "plugin_version": "1.2.3",
               "prompts": [
                 {
-                  "entry_id": "claude-entry-no-plugin-version",
-                  "timestamp": "2026-06-14T10:00:00.000Z",
-                  "session_id": "session-no-plugin-version",
+                  "entry_id": "claude-entry-conflict",
+                  "timestamp": "2026-06-20T10:00:00.000Z",
+                  "session_id": "session-conflict",
                   "model": "claude-sonnet-4-6",
                   "usage": {
-                    "input_tokens": 1,
-                    "output_tokens": 2,
-                    "cache_creation_input_tokens": 3,
-                    "cache_read_input_tokens": 4
+                    "input_tokens": 1000,
+                    "output_tokens": 5000,
+                    "cache_creation_input_tokens": 300,
+                    "cache_read_input_tokens": 400
+                  }
+                }
+              ]
+            }
+            """.trimIndent(),
+        )
+    }
+
+suspend fun postClaudeConflictUpdated(client: HttpClient): HttpResponse =
+    client.post("/api/usage/ingest/claude") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(
+            """
+            {
+              "user_id": "user1",
+              "plugin_version": "1.2.3",
+              "prompts": [
+                {
+                  "entry_id": "claude-entry-conflict",
+                  "timestamp": "2026-06-20T10:00:00.000Z",
+                  "session_id": "session-conflict",
+                  "model": "claude-sonnet-4-6",
+                  "usage": {
+                    "input_tokens": 2000,
+                    "output_tokens": 3000,
+                    "cache_creation_input_tokens": 250,
+                    "cache_read_input_tokens": 900
                   }
                 }
               ]

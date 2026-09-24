@@ -12,7 +12,15 @@ interface ClaudeUsageRepository {
         """
         INSERT INTO claude_usage_records (model, timestamp, session_id, prompt_id, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cache_write_5m_tokens, cache_write_1h_tokens, cost_usd_cent, co2_gram, plugin_version)
         VALUES (:model, :timestamp, :sessionId, :promptId, :inputTokens, :outputTokens, :cacheReadTokens, :cacheWriteTokens, :cacheWrite5mTokens, :cacheWrite1hTokens, :costUsdCent, :co2Gram, :pluginVersion)
-        ON CONFLICT (session_id, prompt_id) DO NOTHING
+        ON CONFLICT (session_id, prompt_id) DO UPDATE SET
+            input_tokens = GREATEST(claude_usage_records.input_tokens, EXCLUDED.input_tokens),
+            output_tokens = GREATEST(claude_usage_records.output_tokens, EXCLUDED.output_tokens),
+            cache_read_tokens = GREATEST(claude_usage_records.cache_read_tokens, EXCLUDED.cache_read_tokens),
+            cache_write_tokens = GREATEST(claude_usage_records.cache_write_tokens, EXCLUDED.cache_write_tokens),
+            cache_write_5m_tokens = GREATEST(claude_usage_records.cache_write_5m_tokens, EXCLUDED.cache_write_5m_tokens),
+            cache_write_1h_tokens = GREATEST(claude_usage_records.cache_write_1h_tokens, EXCLUDED.cache_write_1h_tokens),
+            cost_usd_cent = GREATEST(claude_usage_records.cost_usd_cent, EXCLUDED.cost_usd_cent),
+            co2_gram = GREATEST(claude_usage_records.co2_gram, EXCLUDED.co2_gram)
     """,
     )
     fun insertAll(
