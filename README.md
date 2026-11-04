@@ -31,6 +31,26 @@ The dashboard then runs on <http://localhost:8088>; point the plugins at the sam
 address. `PUBLIC_COMPANY_NAME`, `DATABASE_PASSWORD` and `TOKENDASHBOARD_PORT` can be set
 in the shell or in a `.env` next to the file. Needs Docker Compose 2.23 or newer.
 
+### Claude Code in a devcontainer
+
+A devcontainer that mounts `~/.claude` (as the devcontainers of these repositories do)
+shares the Claude plugin's config and queue with the host, so both send to the same
+`--api-base-url`. With `http://localhost:8088` a session inside the container cannot
+reach the stack: there, `localhost` is the container itself. Its entries stay in the
+shared queue and are sent the next time a Claude Code session on the host starts or
+ends. Nothing is lost, but it shows up late, and not at all as long as Claude Code only
+runs in the container.
+
+To have the container send right away, install the plugin with
+`--api-base-url http://host.docker.internal:8088` instead (`:8080` for a backend started
+with `./gradlew run` on the host). Docker Desktop resolves that name inside containers
+only, so it is then the other way round: sessions on the host stay in the queue until a
+session in the container starts or ends. As the config is shared, only one side can send
+directly.
+
+This only concerns a local backend: under a real hostname, as in a deployment, host and
+container reach the same address.
+
 ## Development
 
 Each side is built from its own folder (`./gradlew …` in `backend/`, `npm …` in
