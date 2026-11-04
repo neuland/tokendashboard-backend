@@ -18,6 +18,19 @@ Backend and frontend were separate repositories until they were merged here with
 full history; `git log -- backend/` or `git log -- frontend/` shows the history of one
 side.
 
+## Try it out
+
+[`docker-compose.yml`](docker-compose.yml) builds both images from this checkout and
+starts them with a database:
+
+```bash
+docker compose up --build
+```
+
+The dashboard then runs on <http://localhost:8088>; point the plugins at the same
+address. `PUBLIC_COMPANY_NAME`, `DATABASE_PASSWORD` and `TOKENDASHBOARD_PORT` can be set
+in the shell or in a `.env` next to the file. Needs Docker Compose 2.23 or newer.
+
 ## Development
 
 Each side is built from its own folder (`./gradlew …` in `backend/`, `npm …` in

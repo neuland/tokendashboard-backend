@@ -1,0 +1,8 @@
+# The Dockerfile copies only the Gradle files and src/; this keeps local build output
+# and IDE files out of the build context so it stays small.
+.gradle
+.kotlin
+build
+bin
+out
+.idea
