@@ -1,0 +1,322 @@
+/* ==========================================================================
+   Global app styles — Token & CO₂ Dashboard
+   ========================================================================== */
+@import './tokens.css';
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-2);
+  color: var(--fg-2);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--neuland-link); }
+
+/* Card — a UI surface, so a shadow is allowed here (unlike presentation surfaces) */
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--bg-3);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-sm);
+}
+
+/* Footnote asterisk next to a value, linking into the FAQ */
+.footnote-mark {
+  color: var(--neuland-primary);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  margin-left: 1px;
+  cursor: help;
+  vertical-align: super;
+  font-size: 0.7em;
+  line-height: 0;
+}
+.footnote-mark:hover { text-decoration: underline; }
+
+/* Plugin install/uninstall command, copy-to-clipboard */
+.install-command {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+  font-size: 0.8125rem;
+}
+.install-command__label { font-weight: var(--fw-semibold); white-space: nowrap; }
+.install-command__code { flex: 1 1 auto; min-width: 0; overflow-x: auto; white-space: pre; }
+.install-command__copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--fg-3);
+}
+.install-command__copy:hover { color: var(--fg-1); }
+
+/* ============================================================
+   DATE RANGE PICKER — trigger + overlay
+   ============================================================ */
+.rp {
+  position: relative;
+  margin-top: var(--space-sm);
+}
+
+/* View switcher above the history charts */
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--neuland-light-grey);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.view-toggle__btn {
+  padding: 8px 14px;
+  border: none;
+  background: var(--bg-1);
+  color: var(--fg-2);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  cursor: pointer;
+}
+.view-toggle__btn + .view-toggle__btn { border-left: 1px solid var(--neuland-light-grey); }
+.view-toggle__btn:hover { background: var(--bg-2); color: var(--neuland-primary); }
+.view-toggle__btn--active {
+  background: var(--neuland-primary);
+  color: var(--fg-on-primary);
+}
+.view-toggle__btn--active:hover { background: var(--neuland-primary-dark); color: var(--fg-on-primary); }
+
+/* Trigger: selected option plus the dates it resolves to */
+.rp__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-1);
+  border: 1px solid var(--bg-3);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--fg-1);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--ease-fast);
+}
+.rp__trigger:hover:not(:disabled) { border-color: var(--neuland-primary); }
+.rp__trigger:focus-visible {
+  outline: 2px solid var(--neuland-primary);
+  outline-offset: 1px;
+}
+.rp__trigger:disabled { opacity: 0.6; cursor: not-allowed; }
+.rp__trigger-icon { color: var(--neuland-primary); flex-shrink: 0; }
+.rp__trigger-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+  flex: 1;
+}
+.rp__trigger-label { font-weight: var(--fw-semibold); }
+.rp__trigger-range {
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  color: var(--fg-3);
+}
+.rp__trigger-chevron {
+  color: var(--fg-3);
+  flex-shrink: 0;
+  transition: transform var(--ease-fast);
+}
+.rp__trigger-chevron--open { transform: rotate(180deg); }
+
+/* Backdrop: an invisible click catcher on desktop, dimming on mobile */
+.rp__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: transparent;
+}
+
+/* Panel: a dropdown below the trigger on desktop */
+.rp__panel {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 8px);
+  right: 0; /* the trigger sits at the right of its row, so open leftwards */
+  left: auto;
+  width: min(640px, calc(100vw - 2 * var(--space-sm)));
+  background: var(--bg-1);
+  border: 1px solid var(--bg-3);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-sm);
+}
+.rp__panel-head {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.rp__panel-title { font-weight: var(--fw-semibold); }
+.rp__close {
+  display: inline-flex;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--fg-3);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.rp__close:hover { color: var(--neuland-primary); }
+
+/* Preset groups: columns on desktop, stacked on mobile */
+.rp__groups {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+}
+.rp__group { display: flex; flex-direction: column; gap: 2px; }
+.rp__group-title {
+  font-size: var(--t-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-4);
+  margin-bottom: 4px;
+}
+.rp__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  color: var(--fg-2);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--ease-fast), color var(--ease-fast);
+}
+.rp__option:hover { background: var(--bg-2); color: var(--neuland-primary); }
+.rp__option--active {
+  background: var(--neuland-primary);
+  color: var(--fg-on-primary);
+}
+.rp__option--active:hover { background: var(--neuland-primary-dark); color: var(--fg-on-primary); }
+
+/* From/to fields, custom mode only */
+.rp__custom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+.rp__field { display: flex; flex-direction: column; gap: 4px; }
+.rp__field-label { font-size: var(--t-small); color: var(--fg-3); }
+.rp__input {
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  padding: 8px 10px;
+  border: 1px solid var(--bg-3);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  color: var(--fg-1);
+}
+.rp__input:focus-visible {
+  outline: 2px solid var(--neuland-primary);
+  outline-offset: 1px;
+  border-color: var(--neuland-primary);
+}
+.rp__apply {
+  margin-top: 4px;
+  padding: 10px 14px;
+  border: 1px solid var(--neuland-primary);
+  border-radius: var(--radius-sm);
+  background: var(--neuland-primary);
+  color: var(--fg-on-primary);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background var(--ease-fast);
+}
+.rp__apply:hover:not(:disabled) { background: var(--neuland-primary-dark); }
+.rp__apply:focus-visible {
+  outline: 2px solid var(--neuland-primary);
+  outline-offset: 2px;
+}
+.rp__apply:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Mobile: the panel becomes a bottom sheet */
+@media (max-width: 720px) {
+  .rp { width: 100%; }
+  .rp__trigger { width: 100%; }
+  .rp__backdrop { background: rgba(45, 45, 45, 0.45); }
+  .rp__panel {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--space-sm) var(--space-sm) calc(var(--space-sm) + env(safe-area-inset-bottom));
+  }
+  .rp__panel-head { display: flex; }
+  .rp__groups { grid-template-columns: 1fr; gap: var(--space-xs); }
+}
+
+/* Loading and error states */
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 160px;
+  color: var(--fg-3);
+}
+.spinner {
+  width: 22px; height: 22px;
+  border: 3px solid var(--bg-3);
+  border-top-color: var(--neuland-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Charts get their height from here; Recharts' ResponsiveContainer handles the width */
+.chart-card { padding: var(--space-sm); }
+.chart-wrap {
+  width: 100%;
+  height: clamp(240px, 42vw, 380px);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Phone */
+@media (max-width: 480px) {
+  .chart-card { padding: 14px; }
+}
+
+/* Reduced motion: stop the spinner */
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
