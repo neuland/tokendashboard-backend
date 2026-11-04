@@ -11,7 +11,7 @@ not entities with identity and lifecycle.
 - Types with validity constraints use a **private constructor + factory method** so an invalid instance can't be
   constructed (exemplar: `DayRange.of`).
 - Prefer a `sealed interface` over a nullable/flag-based state for a small closed set of variants
-  (`UsageResult.NoUsage` / `HasUsage(NonEmptyList<...>)` rules out "has usage but list is empty" at the type level
+  (`ModelUsages.NoUsage` / `HasUsage(NonEmptyList<...>)` rules out "has usage but list is empty" at the type level
   and forces exhaustive `when`).
 
 ## Repositories
@@ -27,7 +27,7 @@ adapter/outgoing/repository/ClaudeUsageRepositoryAdapter.kt ← implements the p
 `...RepositoryAdapter` is the anti-corruption layer: the only place that sees JDBI row types.
 
 - Port interfaces return domain types only, never row types or DTOs.
-- Methods express domain intent (`activeUser4Weeks()`, `claudeUsageSeries(from, to, granularity)`), not
+- Methods express domain intent (`activeUser4Weeks()`, `claudeDailyUsage(range)`), not
   `findBy...`/`selectWhere...`.
 - Naming: `<X>RepositoryPort` / `<X>Repository` (JDBI) / `<X>RepositoryAdapter`.
 

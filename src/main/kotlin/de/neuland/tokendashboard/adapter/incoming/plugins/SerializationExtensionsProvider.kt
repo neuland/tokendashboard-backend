@@ -1,23 +1,21 @@
 package de.neuland.tokendashboard.adapter.incoming.plugins
 
-import arrow.core.NonEmptyList
 import de.neuland.tokendashboard.domain.model.ModelFamilyUsage
 import de.neuland.tokendashboard.domain.model.ModelUsage
+import de.neuland.tokendashboard.domain.model.ModelUsages
 import de.neuland.tokendashboard.domain.model.Provider
 import de.neuland.tokendashboard.domain.model.Provider.CLAUDE
 import de.neuland.tokendashboard.domain.model.Provider.COPILOT
 import de.neuland.tokendashboard.domain.model.Provider.OPENCODE
-import de.neuland.tokendashboard.domain.model.ProviderPluginUsage
-import de.neuland.tokendashboard.domain.model.ProviderUsageDetail
-import de.neuland.tokendashboard.domain.model.UsageResult
+import de.neuland.tokendashboard.domain.model.ProviderUsageByModel
+import de.neuland.tokendashboard.domain.model.ProviderUsageOverview
 import de.neuland.tokendashboard.domain.model.UsageTotals
-import kotlinx.serialization.SerialName
+import de.neuland.tokendashboard.domain.model.totals
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProviderPluginUsageDto(
     val usage: ProviderUsageDetailDto,
-    @SerialName("activeUsersFor4Weeks")
     val activeUsersLast4Weeks: Int,
 )
 
@@ -70,14 +68,18 @@ private fun formatModelName(
         OPENCODE -> name
     }
 
-fun ProviderPluginUsage.toResponse() =
+fun ProviderUsageOverview.toResponse() =
     ProviderPluginUsageDto(
         usage = usage.toResponse(),
         activeUsersLast4Weeks = activeUsersLast4Weeks.value,
     )
 
-fun ProviderUsageDetail.toResponse(): ProviderUsageDetailDto {
-    val totals = sumUp(modelUsages)
+fun ProviderUsageByModel.toResponse(): ProviderUsageDetailDto {
+    val totals =
+        when (modelUsages) {
+            is ModelUsages.NoUsage -> null
+            is ModelUsages.HasUsage -> modelUsages.totals().toDto()
+        }
     return ProviderUsageDetailDto(
         from = range.from.print(),
         to = range.to.print(),
@@ -89,15 +91,6 @@ fun ProviderUsageDetail.toResponse(): ProviderUsageDetailDto {
             ),
     )
 }
-
-fun sumUp(values: UsageResult): DetailedUsageInfoDto? =
-    when (values) {
-        is UsageResult.NoUsage -> null
-        is UsageResult.HasUsage -> sumToEntry(values.entries)
-    }
-
-fun sumToEntry(entries: NonEmptyList<ModelUsage>): DetailedUsageInfoDto =
-    entries.fold(UsageTotals.zero()) { acc, usage -> acc + usage }.toDto()
 
 private fun UsageTotals.toDto(): DetailedUsageInfoDto =
     DetailedUsageInfoDto(
@@ -113,7 +106,7 @@ fun ModelFamilyUsage.toResponse(provider: Provider) =
     ModelFamilyUsageDto(
         modelFamily = modelFamily.value,
         models = modelUsages.map { it.toResponse(provider) },
-        tokens = sumToEntry(modelUsages),
+        tokens = modelUsages.totals().toDto(),
     )
 
 fun ModelUsage.toResponse(provider: Provider) =

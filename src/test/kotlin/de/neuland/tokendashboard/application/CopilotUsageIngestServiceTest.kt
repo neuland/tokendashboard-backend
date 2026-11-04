@@ -1,7 +1,6 @@
 package de.neuland.tokendashboard.application
 
 import arrow.core.nonEmptyListOf
-import de.neuland.tokendashboard.application.port.outgoing.Co2FactorRepositoryPort
 import de.neuland.tokendashboard.application.port.outgoing.CopilotUsageRepositoryPort
 import de.neuland.tokendashboard.application.port.outgoing.UserRepositoryPort
 import de.neuland.tokendashboard.domain.model.CopilotUsageRecord
@@ -31,16 +30,14 @@ class CopilotUsageIngestServiceTest :
 
         val noUserRepo = mockk<UserRepositoryPort>()
         val repository = mockk<CopilotUsageRepositoryPort>()
-        val noFactor = mockk<Co2FactorRepositoryPort>()
 
-        fun service() = CopilotUsageIngestService(repository, noUserRepo, noFactor)
+        fun service() = CopilotUsageIngestService(repository, noUserRepo)
 
         beforeTest {
             clearAllMocks()
             every { noUserRepo.upsert(any(), any(), any()) } just Runs
             every { noUserRepo.activeUsersLast4Weeks(any()) } returns UserCount(0)
             every { repository.insertAll(any()) } just Runs
-            every { noFactor.co2FactorsFor(any(), any()) } returns null
         }
 
         test("ingest saves one record per prompt entry") {

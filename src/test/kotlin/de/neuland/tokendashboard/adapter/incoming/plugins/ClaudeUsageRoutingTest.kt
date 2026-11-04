@@ -14,13 +14,13 @@ import de.neuland.tokendashboard.domain.model.DollarCent
 import de.neuland.tokendashboard.domain.model.Granularity
 import de.neuland.tokendashboard.domain.model.ModelName
 import de.neuland.tokendashboard.domain.model.ModelUsage
+import de.neuland.tokendashboard.domain.model.ModelUsages
 import de.neuland.tokendashboard.domain.model.Provider.CLAUDE
-import de.neuland.tokendashboard.domain.model.ProviderPluginUsage
-import de.neuland.tokendashboard.domain.model.ProviderUsageDetail
+import de.neuland.tokendashboard.domain.model.ProviderUsageByModel
+import de.neuland.tokendashboard.domain.model.ProviderUsageOverview
 import de.neuland.tokendashboard.domain.model.TokenCount
 import de.neuland.tokendashboard.domain.model.TokenCounts
 import de.neuland.tokendashboard.domain.model.UsageBucket
-import de.neuland.tokendashboard.domain.model.UsageResult
 import de.neuland.tokendashboard.domain.model.UsageSeries
 import de.neuland.tokendashboard.domain.model.UserCount
 import de.neuland.tokendashboard.testsupport.fixedTimeFactory
@@ -56,24 +56,24 @@ class ClaudeUsageRoutingTest :
         val claudeIngestService = mockk<IngestClaudeUsagePort>(relaxed = true)
 
         fun emptyOverview(range: DayRange) =
-            ProviderPluginUsage(
+            ProviderUsageOverview(
                 usage =
-                    ProviderUsageDetail(
+                    ProviderUsageByModel(
                         provider = CLAUDE,
                         range = range,
-                        modelUsages = UsageResult.NoUsage,
+                        modelUsages = ModelUsages.NoUsage,
                     ),
                 activeUsersLast4Weeks = UserCount(0),
             )
 
-        fun overviewWithModel(range: DayRange): ProviderPluginUsage =
-            ProviderPluginUsage(
+        fun overviewWithModel(range: DayRange): ProviderUsageOverview =
+            ProviderUsageOverview(
                 usage =
-                    ProviderUsageDetail(
+                    ProviderUsageByModel(
                         provider = CLAUDE,
                         range = range,
                         modelUsages =
-                            UsageResult.HasUsage(
+                            ModelUsages.HasUsage(
                                 listOf(
                                     ModelUsage(
                                         model = ModelName.restore("sonnet"),
@@ -117,7 +117,7 @@ class ClaudeUsageRoutingTest :
                     listOf(
                         UsageBucket(
                             date = range.to,
-                            modelUsages = UsageResult.HasUsage(modelUsages),
+                            modelUsages = ModelUsages.HasUsage(modelUsages),
                             pluginInstallations = UserCount(3),
                         ),
                     ),

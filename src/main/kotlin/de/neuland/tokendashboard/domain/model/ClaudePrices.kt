@@ -9,10 +9,21 @@ data class ClaudePrices(
     val cacheWrite1hCentPerMillion: CentPerMillionToken,
     val cacheReadCentPerMillion: CentPerMillionToken,
 ) {
-    fun calculateCost(tokenCounts: IncomingTokenCounts): DollarCent {
+    companion object {
+        val ZERO =
+            ClaudePrices(
+                CentPerMillionToken.ZERO,
+                CentPerMillionToken.ZERO,
+                CentPerMillionToken.ZERO,
+                CentPerMillionToken.ZERO,
+                CentPerMillionToken.ZERO,
+            )
+    }
+
+    fun calculateCost(tokenCounts: ClaudeTokenCounts): DollarCent {
         val cacheWriteCent =
-            tokenCounts.cacheWriteTokens.billedAt1hRate() * cacheWrite1hCentPerMillion.centPerToken() +
-                tokenCounts.cacheWriteTokens.tokens5m * cacheWrite5mCentPerMillion.centPerToken()
+            tokenCounts.cacheWriteBilledAt1hRate() * cacheWrite1hCentPerMillion.centPerToken() +
+                tokenCounts.cacheWriteTokens5m * cacheWrite5mCentPerMillion.centPerToken()
         val cent =
             tokenCounts.inputTokens * inputCentPerMillion.centPerToken() +
                 tokenCounts.outputTokens * outputCentPerMillion.centPerToken() +

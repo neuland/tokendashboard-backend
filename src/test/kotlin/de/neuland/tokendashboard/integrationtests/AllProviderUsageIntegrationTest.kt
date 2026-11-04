@@ -89,7 +89,7 @@ class AllProviderUsageIntegrationTest :
                 with14.provider("COPILOT").totalCostUsdCent shouldBe 40_040
                 with14.provider("COPILOT").totalEstimatedCo2 shouldBe 0.0
                 with14.provider("OPENCODE").tokensInOut shouldBe 800_000
-                with14.provider("OPENCODE").totalCostUsdCent shouldBe 13 // rounding
+                with14.provider("OPENCODE").totalCostUsdCent shouldBe 12 // sum of per-day, per-model rounded cents
                 with14.provider("OPENCODE").totalEstimatedCo2 shouldBe 0.0
 
                 // when requesting only june 15
@@ -102,7 +102,7 @@ class AllProviderUsageIntegrationTest :
                 only15.provider("COPILOT").totalCostUsdCent shouldBe 20_020
                 only15.provider("COPILOT").totalEstimatedCo2 shouldBe 0.0
                 only15.provider("OPENCODE").tokensInOut shouldBe 400_000
-                only15.provider("OPENCODE").totalCostUsdCent shouldBe 7
+                only15.provider("OPENCODE").totalCostUsdCent shouldBe 6 // deepseek 4.242424 -> 4 + mimo 2.424242 -> 2
                 only15.provider("OPENCODE").totalEstimatedCo2 shouldBe 0.0
             }
         }

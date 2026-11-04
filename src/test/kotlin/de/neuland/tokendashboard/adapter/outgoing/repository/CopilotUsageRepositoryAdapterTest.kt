@@ -1,21 +1,16 @@
 package de.neuland.tokendashboard.adapter.outgoing.repository
 
-import arrow.core.toNonEmptyListOrNull
-import de.neuland.tokendashboard.domain.model.Co2Gram
+import de.neuland.tokendashboard.domain.model.CopilotRawModelUsage
 import de.neuland.tokendashboard.domain.model.CopilotUsageRecord
 import de.neuland.tokendashboard.domain.model.Day
 import de.neuland.tokendashboard.domain.model.DayRange
-import de.neuland.tokendashboard.domain.model.DollarCent
 import de.neuland.tokendashboard.domain.model.ModelName
-import de.neuland.tokendashboard.domain.model.ModelUsage
 import de.neuland.tokendashboard.domain.model.NanoAiu
 import de.neuland.tokendashboard.domain.model.PluginVersion
 import de.neuland.tokendashboard.domain.model.PromptTimestamp
-import de.neuland.tokendashboard.domain.model.Provider.COPILOT
 import de.neuland.tokendashboard.domain.model.SessionId
 import de.neuland.tokendashboard.domain.model.TokenCount
 import de.neuland.tokendashboard.domain.model.TokenCounts
-import de.neuland.tokendashboard.domain.model.UsageResult
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.Runs
@@ -36,71 +31,41 @@ class CopilotUsageRepositoryAdapterTest :
         val from = Day(LocalDate.of(2026, 6, 1))
         val to = Day(LocalDate.of(2026, 6, 15))
 
-        test("copilotProviderUsage maps totals row to ProviderUsage, converting nanoAiu to cent") {
-            every { jdbi.aggregateCopilotTotals(from.value, to.value) } returns
-                AggregatedCopilotTotalsRow(tokens = 42, nanoAiu = 1_500_000_000L, co2Gram = 5.5)
+        test("copilotDailyUsage maps day rows to tokens and nanoAiu per model, grouped by day") {
+            fun row(
+                date: LocalDate,
+                model: String,
+            ) = AggregatedCopilotBucketRow(
+                date = date,
+                model = model,
+                inputTokens = 100,
+                outputTokens = 200,
+                cacheReadTokens = 20,
+                cacheWriteTokens = 10,
+                nanoAiu = 1_500_000_000L,
+            )
+            every { jdbi.aggregateCopilotByDayAndModel(from.value, to.value) } returns
+                listOf(row(to.value, "gpt-5.4"), row(to.value, "gpt-5.4-mini"), row(from.value, "gpt-5.4-mini"))
 
-            val result = adapter.copilotProviderUsage(DayRange.of(from, to))
+            val result = adapter.copilotDailyUsage(DayRange.of(from, to))
 
-            result.provider shouldBe COPILOT
-            result.tokensInOut shouldBe TokenCount(42)
-            result.totalEstimatedCo2 shouldBe Co2Gram(5.5)
-            // 1.5 aiu rounds up to 2, not truncated to 1
-            result.totalCostUsdCent shouldBe DollarCent(2L)
-        }
-
-        test("copilotProviderUsage rounds sub-aiu remainder instead of truncating") {
-            every { jdbi.aggregateCopilotTotals(from.value, to.value) } returns
-                AggregatedCopilotTotalsRow(tokens = 0, nanoAiu = 999_999_999L, co2Gram = 0.0)
-
-            val result = adapter.copilotProviderUsage(DayRange.of(from, to))
-
-            // 999_999_999 nanoAiu is one unit short of 1 aiu -> rounds up to 1, not truncated to 0
-            result.totalCostUsdCent shouldBe DollarCent(1L)
-        }
-
-        test("copilotUsageByDateRange maps rows to ModelUsage list") {
-            every { jdbi.aggregateCopilotByModel(from.value, to.value) } returns
-                listOf(
-                    AggregatedCopilotRow(
-                        model = "gpt-5.4-mini",
-                        inputTokens = 100,
-                        outputTokens = 200,
-                        cacheReadTokens = 20,
-                        cacheWriteTokens = 10,
-                        nanoAiu = 2_000_000_000L,
-                        co2Gram = 1.1,
-                    ),
+            fun tokens(model: String) =
+                CopilotRawModelUsage(
+                    model = ModelName.restore(model),
+                    tokens = TokenCounts(TokenCount(100), TokenCount(200), TokenCount(20), TokenCount(10)),
+                    nanoAiu = NanoAiu(1_500_000_000L),
                 )
-
-            val result = adapter.copilotUsageByDateRange(DayRange.of(from, to))
-
-            result.provider shouldBe COPILOT
-            result.range.from shouldBe from
-            result.range.to shouldBe to
-            result.modelUsages shouldBe
-                UsageResult.HasUsage(
-                    listOf(
-                        ModelUsage(
-                            model = ModelName.restore("gpt-5.4-mini"),
-                            tokens =
-                                TokenCounts(
-                                    inputTokens = TokenCount(100),
-                                    outputTokens = TokenCount(200),
-                                    cacheReadTokens = TokenCount(20),
-                                    cacheWriteTokens = TokenCount(10),
-                                ),
-                            costUsdCent = DollarCent(2L),
-                            estimatedCO2 = Co2Gram(1.1),
-                        ),
-                    ).toNonEmptyListOrNull()!!,
+            result shouldBe
+                mapOf(
+                    to to listOf(tokens("gpt-5.4"), tokens("gpt-5.4-mini")),
+                    from to listOf(tokens("gpt-5.4-mini")),
                 )
         }
 
-        test("copilotUsageByDateRange returns empty list when no rows found") {
-            every { jdbi.aggregateCopilotByModel(from.value, to.value) } returns emptyList()
+        test("copilotDailyUsage returns no days when no rows found") {
+            every { jdbi.aggregateCopilotByDayAndModel(from.value, to.value) } returns emptyList()
 
-            adapter.copilotUsageByDateRange(DayRange.of(from, to)).modelUsages shouldBe UsageResult.NoUsage
+            adapter.copilotDailyUsage(DayRange.of(from, to)) shouldBe emptyMap()
         }
 
         test("insertAll delegates rows built from the domain records") {
@@ -120,7 +85,6 @@ class CopilotUsageRepositoryAdapterTest :
                             cacheWriteTokens = TokenCount(400),
                         ),
                     nanoAiu = NanoAiu(123456789L),
-                    co2Gram = Co2Gram(2.5),
                     pluginVersion = PluginVersion("1.2.3"),
                 )
 
@@ -135,7 +99,6 @@ class CopilotUsageRepositoryAdapterTest :
             row.cacheReadTokens shouldBe 300
             row.cacheWriteTokens shouldBe 400
             row.nanoAiu shouldBe 123456789L
-            row.co2Gram shouldBe 2.5
             row.pluginVersion shouldBe "1.2.3"
         }
     })

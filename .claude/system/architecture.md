@@ -39,6 +39,18 @@ Command classes carry the input for a driving-port use case. Since everything un
 interface, commands live directly under `application/`, named `<UseCase>Command` (e.g.
 `IngestClaudeUsageRecordCommand`).
 
+## Read path: usage with cost and CO₂
+
+Cost and CO₂ are not stored; they are calculated on every read (see `docs/decisions.md`, decision 9):
+
+1. **Repository port** returns raw daily usage per model (`claudeDailyUsage(range)` etc.) — tokens plus the
+   provider's raw cost value, if any.
+2. **`<Provider>UsageSource`** (`application/`, implements `ProviderUsageSource`) loads the price/CO₂ factor
+   history and hands both to the matching **`<Provider>UsageValuation`** (`domain/model/`), which turns each day and
+   model into a `ModelUsage` with cost (whole cents) and CO₂. `ProviderUsageSources` picks the source per `Provider`.
+3. **Query services** aggregate the valued days with the functions in `domain/UsageAggregation.kt` (`rollUp`,
+   `sumByModel`, `buildUsageBuckets`).
+
 ## Design Principles
 
 - **Separation of concerns**: routing handles HTTP, application services orchestrate, domain holds business logic

@@ -17,11 +17,13 @@ class ClaudePricesTest :
 
         test("calculate cost sums weighted token counts") {
             val tokens =
-                IncomingTokenCounts(
+                ClaudeTokenCounts(
                     inputTokens = TokenCount(1_000_000),
                     outputTokens = TokenCount(1_000_000),
                     cacheReadTokens = TokenCount(1_000_000),
-                    cacheWriteTokens = IncomingCacheWriteTokens(TokenCount(1_000_000), TokenCount.ZERO, TokenCount.ZERO),
+                    cacheWriteTokens5m = TokenCount(1_000_000),
+                    cacheWriteTokens1h = TokenCount.ZERO,
+                    cacheWriteTokensGeneric = TokenCount.ZERO,
                 )
 
             prices.calculateCost(tokens) shouldBe DollarCent(300 + 1500 + 375 + 30)
@@ -29,11 +31,13 @@ class ClaudePricesTest :
 
         test("calculate cost applies distinct rate per cache write duration") {
             val tokens =
-                IncomingTokenCounts(
+                ClaudeTokenCounts(
                     inputTokens = TokenCount(0),
                     outputTokens = TokenCount(0),
                     cacheReadTokens = TokenCount(0),
-                    cacheWriteTokens = IncomingCacheWriteTokens(TokenCount(1_000_000), TokenCount(1_000_000), TokenCount(1_000_000)),
+                    cacheWriteTokens5m = TokenCount(1_000_000),
+                    cacheWriteTokens1h = TokenCount(1_000_000),
+                    cacheWriteTokensGeneric = TokenCount(1_000_000),
                 )
 
             prices.calculateCost(tokens) shouldBe DollarCent(375 + 600 + 600)
@@ -43,11 +47,13 @@ class ClaudePricesTest :
             // 3 tokens * 300 cent/1e6 = 0.0009, plus a single output token chosen so the
             // sum lands exactly on x.5 cent: 1 token * 500_000 cent/1e6 = 0.5 cent
             val tokens =
-                IncomingTokenCounts(
+                ClaudeTokenCounts(
                     inputTokens = TokenCount(0),
                     outputTokens = TokenCount(1),
                     cacheReadTokens = TokenCount(0),
-                    cacheWriteTokens = IncomingCacheWriteTokens(TokenCount.ZERO, TokenCount.ZERO, TokenCount.ZERO),
+                    cacheWriteTokens5m = TokenCount.ZERO,
+                    cacheWriteTokens1h = TokenCount.ZERO,
+                    cacheWriteTokensGeneric = TokenCount.ZERO,
                 )
             val halfCentPrices =
                 ClaudePrices(
@@ -63,11 +69,13 @@ class ClaudePricesTest :
 
         test("calculate costs for small values") {
             val tokens =
-                IncomingTokenCounts(
+                ClaudeTokenCounts(
                     inputTokens = TokenCount(10),
                     outputTokens = TokenCount(100),
                     cacheReadTokens = TokenCount(1000),
-                    cacheWriteTokens = IncomingCacheWriteTokens(TokenCount(5000), TokenCount(5000), TokenCount.ZERO),
+                    cacheWriteTokens5m = TokenCount(5000),
+                    cacheWriteTokens1h = TokenCount(5000),
+                    cacheWriteTokensGeneric = TokenCount.ZERO,
                 )
             val halfCentPrices =
                 ClaudePrices(

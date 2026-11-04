@@ -52,6 +52,12 @@ family (input/output/cache-write/cache-read, cent per million tokens). The
 Claude plugin fetches this on update to show users their own costs. See
 [docs/decisions.md](docs/decisions.md#5-claude-prices-single-source-via-endpoint-not-a-duplicated-file).
 
+`GET /api/prices/claude/history` and `GET /api/co2-factors/claude` return
+every version of the prices and CO₂ factors with its `validFrom` date, keyed
+by the same model family names. They let the plugin evaluate its local usage
+history with the values that were valid on each day, without keeping its own
+copy of either table.
+
 ## Series return number of installations, not users at bucket day
 
 **`pluginInstallations` semantics**: Number of installations that are “active” on the bucket day, defined as:
@@ -102,6 +108,12 @@ Note that Claude inside the devcontainer is started with the parameter
 `examples/` contains generic deployment config (CI, Kubernetes manifests,
 HTTP client env) with placeholder values — use it as the starting point for
 your own deployment.
+
+Set `REPORTING_TIME_ZONE` to the IANA time zone in which usage is grouped
+into days (e.g. `Europe/Berlin`, `Asia/Tokyo`; default `UTC`). It applies to
+all usage views and also decides which price and CO₂ factor version applies
+to a prompt near midnight. Changing it takes effect after a restart, for
+historical usage as well. See decision 15 in `docs/decisions.md`.
 
 ## Tests
 

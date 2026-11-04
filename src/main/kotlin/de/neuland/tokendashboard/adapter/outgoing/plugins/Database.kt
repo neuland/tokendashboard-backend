@@ -53,9 +53,45 @@ fun configureDatabase(config: ApplicationEnvironment): Jdbi {
         .load()
         .migrate()
 
-    return Jdbi
-        .create(dataSource)
-        .installPlugin(KotlinPlugin())
-        .installPlugin(KotlinSqlObjectPlugin())
-        .installPlugin(PostgresPlugin())
+    val jdbi =
+        Jdbi
+            .create(dataSource)
+            .installPlugin(KotlinPlugin())
+            .installPlugin(KotlinSqlObjectPlugin())
+            .installPlugin(PostgresPlugin())
+    return applyReportingTimeZone(jdbi, reportingTimeZone)
+}
+
+private val USAGE_TABLES_GROUPED_BY_DAY_AND_MODEL =
+    listOf(
+        "claude_usage_records" to "claude_usage_day_model",
+        "copilot_usage_records" to "copilot_usage_day_model",
+        "open_code_usage_records" to "open_code_usage_day_model",
+    )
+
+/**
+ * Makes the reporting time zone available to queries as the SQL literal `<reportingTimeZone>` and
+ * (re)creates the statistics that let Postgres estimate the number of day/model groups correctly.
+ * Without them it assumes one group per row and sorts the whole range instead of hash-aggregating.
+ * Statistics only match a literal expression, so they are rebuilt on every start for the configured zone.
+ */
+fun applyReportingTimeZone(
+    jdbi: Jdbi,
+    reportingTimeZone: String,
+): Jdbi {
+    val zoneLiteral = "'${requireValidTimeZone(reportingTimeZone)}'"
+    jdbi.useTransaction<Exception> { handle ->
+        USAGE_TABLES_GROUPED_BY_DAY_AND_MODEL.forEach { (table, statistics) ->
+            handle.execute("DROP STATISTICS IF EXISTS $statistics")
+            handle.execute(
+                """
+                CREATE STATISTICS $statistics (ndistinct)
+                    ON ((timestamp AT TIME ZONE $zoneLiteral)::date), model
+                    FROM $table
+                """,
+            )
+            handle.execute("ANALYZE $table")
+        }
+    }
+    return jdbi.define("reportingTimeZone", zoneLiteral)
 }

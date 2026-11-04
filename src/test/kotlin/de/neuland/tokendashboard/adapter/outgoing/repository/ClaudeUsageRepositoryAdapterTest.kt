@@ -1,23 +1,18 @@
 package de.neuland.tokendashboard.adapter.outgoing.repository
 
-import arrow.core.toNonEmptyListOrNull
+import de.neuland.tokendashboard.domain.model.ClaudeRawModelUsage
+import de.neuland.tokendashboard.domain.model.ClaudeTokenCounts
 import de.neuland.tokendashboard.domain.model.ClaudeUsageRecord
-import de.neuland.tokendashboard.domain.model.Co2Gram
 import de.neuland.tokendashboard.domain.model.Day
 import de.neuland.tokendashboard.domain.model.DayRange
-import de.neuland.tokendashboard.domain.model.DollarCent
 import de.neuland.tokendashboard.domain.model.IncomingCacheWriteTokens
 import de.neuland.tokendashboard.domain.model.IncomingTokenCounts
 import de.neuland.tokendashboard.domain.model.ModelName
-import de.neuland.tokendashboard.domain.model.ModelUsage
 import de.neuland.tokendashboard.domain.model.PluginVersion
 import de.neuland.tokendashboard.domain.model.PromptId
 import de.neuland.tokendashboard.domain.model.PromptTimestamp
-import de.neuland.tokendashboard.domain.model.Provider.CLAUDE
 import de.neuland.tokendashboard.domain.model.SessionId
 import de.neuland.tokendashboard.domain.model.TokenCount
-import de.neuland.tokendashboard.domain.model.TokenCounts
-import de.neuland.tokendashboard.domain.model.UsageResult
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.Runs
@@ -38,62 +33,47 @@ class ClaudeUsageRepositoryAdapterTest :
         val from = Day(LocalDate.of(2026, 6, 1))
         val to = Day(LocalDate.of(2026, 6, 15))
 
-        test("claudeProviderUsage maps totals row to ProviderUsage") {
-            every { jdbi.aggregateClaudeTotals(from.value, to.value) } returns
-                AggregatedClaudeTotalsRow(tokens = 42, costUsdCent = 123L, co2Gram = 5.5)
-
-            val result = adapter.claudeProviderUsage(DayRange.of(from, to))
-
-            result.provider shouldBe CLAUDE
-            result.tokensInOut shouldBe TokenCount(42)
-            result.totalEstimatedCo2 shouldBe Co2Gram(5.5)
-            result.totalCostUsdCent shouldBe DollarCent(123L)
-        }
-
-        test("claudeUsageByDateRange maps rows to ModelUsage list") {
-            every { jdbi.aggregateClaudeByModel(from.value, to.value) } returns
+        test("claudeDailyUsage maps every token column to its own field and groups rows by day") {
+            fun row(
+                date: LocalDate,
+                model: String,
+            ) = AggregatedClaudeBucketRow(
+                date = date,
+                model = model,
+                inputTokens = 1,
+                outputTokens = 2,
+                cacheWrite5mTokens = 3,
+                cacheWrite1hTokens = 4,
+                cacheWriteTokens = 5,
+                cacheReadTokens = 6,
+            )
+            every { jdbi.aggregateClaudeByDayAndModel(from.value, to.value) } returns
                 listOf(
-                    AggregatedClaudeRow(
-                        model = "claude-opus-4-5",
-                        inputTokens = 100,
-                        outputTokens = 200,
-                        cacheWrite5mTokens = 0,
-                        cacheWrite1hTokens = 0,
-                        cacheWriteTokens = 10,
-                        cacheReadTokens = 20,
-                        costUsdCent = 7L,
-                        co2Gram = 1.1,
-                    ),
+                    row(to.value, "claude-opus-4-5"),
+                    row(to.value, "claude-sonnet-4-5"),
+                    row(from.value, "claude-opus-4-5"),
                 )
 
-            val result = adapter.claudeUsageByDateRange(DayRange.of(from, to))
+            val result = adapter.claudeDailyUsage(DayRange.of(from, to))
 
-            result.provider shouldBe CLAUDE
-            result.range.from shouldBe from
-            result.range.to shouldBe to
-            result.modelUsages shouldBe
-                UsageResult.HasUsage(
-                    listOf(
-                        ModelUsage(
-                            model = ModelName.restore("claude-opus-4-5"),
-                            tokens =
-                                TokenCounts(
-                                    inputTokens = TokenCount(100),
-                                    outputTokens = TokenCount(200),
-                                    cacheReadTokens = TokenCount(20),
-                                    cacheWriteTokens = TokenCount(10),
-                                ),
-                            costUsdCent = DollarCent(7L),
-                            estimatedCO2 = Co2Gram(1.1),
+            val tokens =
+                ClaudeTokenCounts(
+                    inputTokens = TokenCount(1),
+                    outputTokens = TokenCount(2),
+                    cacheReadTokens = TokenCount(6),
+                    cacheWriteTokens5m = TokenCount(3),
+                    cacheWriteTokens1h = TokenCount(4),
+                    cacheWriteTokensGeneric = TokenCount(5),
+                )
+            result shouldBe
+                mapOf(
+                    to to
+                        listOf(
+                            ClaudeRawModelUsage(ModelName.from("claude-opus-4-5"), tokens),
+                            ClaudeRawModelUsage(ModelName.from("claude-sonnet-4-5"), tokens),
                         ),
-                    ).toNonEmptyListOrNull()!!,
+                    from to listOf(ClaudeRawModelUsage(ModelName.from("claude-opus-4-5"), tokens)),
                 )
-        }
-
-        test("claudeUsageByDateRange returns empty list when no rows found") {
-            every { jdbi.aggregateClaudeByModel(from.value, to.value) } returns emptyList()
-
-            adapter.claudeUsageByDateRange(DayRange.of(from, to)).modelUsages shouldBe UsageResult.NoUsage
         }
 
         test("insertAll delegates rows built from the domain records") {
@@ -111,10 +91,13 @@ class ClaudeUsageRepositoryAdapterTest :
                             inputTokens = TokenCount(100),
                             outputTokens = TokenCount(200),
                             cacheReadTokens = TokenCount(300),
-                            cacheWriteTokens = IncomingCacheWriteTokens(TokenCount.ZERO, TokenCount.ZERO, TokenCount(400)),
+                            cacheWriteTokens =
+                                IncomingCacheWriteTokens(
+                                    TokenCount.ZERO,
+                                    TokenCount.ZERO,
+                                    TokenCount(400),
+                                ),
                         ),
-                    costUsdCent = DollarCent(50L),
-                    co2Gram = Co2Gram(2.5),
                     pluginVersion = PluginVersion("1.2.3"),
                 )
 
@@ -129,8 +112,6 @@ class ClaudeUsageRepositoryAdapterTest :
             row.outputTokens shouldBe 200
             row.cacheReadTokens shouldBe 300
             row.cacheWriteTokens shouldBe 400
-            row.costUsdCent shouldBe 50L
-            row.co2Gram shouldBe 2.5
             row.pluginVersion shouldBe "1.2.3"
         }
 
@@ -149,10 +130,13 @@ class ClaudeUsageRepositoryAdapterTest :
                             inputTokens = TokenCount(100),
                             outputTokens = TokenCount(200),
                             cacheReadTokens = TokenCount(300),
-                            cacheWriteTokens = IncomingCacheWriteTokens(TokenCount(40), TokenCount(60), TokenCount.ZERO),
+                            cacheWriteTokens =
+                                IncomingCacheWriteTokens(
+                                    TokenCount(40),
+                                    TokenCount(60),
+                                    TokenCount.ZERO,
+                                ),
                         ),
-                    costUsdCent = DollarCent(50L),
-                    co2Gram = Co2Gram(2.5),
                     pluginVersion = PluginVersion("1.2.3"),
                 )
 

@@ -1,10 +1,8 @@
 package de.neuland.tokendashboard.application
 
 import arrow.core.nonEmptyListOf
-import de.neuland.tokendashboard.application.port.outgoing.Co2FactorRepositoryPort
 import de.neuland.tokendashboard.application.port.outgoing.OpenCodeUsageRepositoryPort
 import de.neuland.tokendashboard.application.port.outgoing.UserRepositoryPort
-import de.neuland.tokendashboard.domain.model.Co2Gram
 import de.neuland.tokendashboard.domain.model.LlmProviderName
 import de.neuland.tokendashboard.domain.model.ModelName
 import de.neuland.tokendashboard.domain.model.NanoCent
@@ -33,15 +31,13 @@ class OpenCodeUsageIngestServiceTest :
 
         val noUserRepo = mockk<UserRepositoryPort>()
         val repository = mockk<OpenCodeUsageRepositoryPort>()
-        val noFactor = mockk<Co2FactorRepositoryPort>()
 
-        fun service() = OpenCodeUsageIngestService(repository, noUserRepo, noFactor)
+        fun service() = OpenCodeUsageIngestService(repository, noUserRepo)
 
         beforeTest {
             clearAllMocks()
             every { noUserRepo.upsert(any(), any(), any()) } just Runs
             every { repository.insertAll(any()) } just Runs
-            every { noFactor.co2FactorsFor(any(), any()) } returns null
         }
 
         test("ingest saves one record per prompt entry") {
@@ -72,7 +68,7 @@ class OpenCodeUsageIngestServiceTest :
             verify { noUserRepo.upsert(any(), OPENCODE, any()) }
         }
 
-        test("ingest maps all fields from command and defaults co2 to zero when no factor") {
+        test("ingest maps all fields from command") {
             val slot = slot<List<OpenCodeUsageRecord>>()
             every { repository.insertAll(capture(slot)) } just Runs
 
@@ -106,7 +102,6 @@ class OpenCodeUsageIngestServiceTest :
             record.tokens.cacheReadTokens shouldBe TokenCount(300)
             record.tokens.cacheWriteTokens shouldBe TokenCount(400)
             record.costNanoCent shouldBe NanoCent(123_000_000_000)
-            record.co2Gram shouldBe Co2Gram(0.0)
             record.pluginVersion shouldBe PluginVersion("1.2.3")
         }
     })

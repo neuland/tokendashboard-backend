@@ -26,18 +26,19 @@ Formatting is handled by **ktlint**. Run `./gradlew ktlintFormat` to format manu
 valuable as a type than a nullable list would be. Constructing one from a runtime collection returns a nullable
 (`toNonEmptyListOrNull()`), so a non-null assertion is unavoidable at the point of construction.
 
-`!!` on `toNonEmptyListOrNull()` is **explicitly allowed** in two situations:
+`!!` on `toNonEmptyListOrNull()` is **explicitly allowed** in three situations:
 
-- **`NonEmptyList` extension helpers**, where the source is already a `NonEmptyList` so the result cannot be empty
-  (exemplar: `UsageResult.groupByNonEmpty` in `domain/model/UsageResult.kt`).
+- **`NonEmptyList` extensions**, where the source is already a `NonEmptyList` so the result cannot be empty
 - **Outbound repository adapters**, where the `!!` is immediately preceded by an `isEmpty()` guard that routes the
-  empty case elsewhere, e.g.:
+  empty case elsewhere
+- **Smart constructors**, which return a valid result for both an empty and a non-empty list
+  (exemplar: `toModelUsages()` in `domain/model/ModelUsages.kt`):
 
   ```kotlin
-  if (list.isEmpty()) UsageResult.NoUsage else UsageResult.HasUsage(list.toNonEmptyListOrNull()!!)
+  if (list.isEmpty()) ModelUsages.NoUsage else ModelUsages.HasUsage(list.toNonEmptyListOrNull()!!)
   ```
 
-In both cases the null branch is provably unreachable — add a short comment stating why. Outside these two
+In all three cases the null branch is provably unreachable — add a short comment stating why. Outside these three
 contexts, prefer the null-safe styles described above.
 
 ### Avoid negation in if-conditions

@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 data class Day(
     val value: LocalDate,
-) {
+) : Comparable<Day> {
     companion object {
         val format: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
@@ -14,4 +14,6 @@ data class Day(
     }
 
     fun print(): String = value.format(format)
+
+    override fun compareTo(other: Day): Int = value.compareTo(other.value)
 }

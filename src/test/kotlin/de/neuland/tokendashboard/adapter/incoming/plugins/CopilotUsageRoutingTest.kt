@@ -8,10 +8,10 @@ import de.neuland.tokendashboard.domain.factories.TimeFactory
 import de.neuland.tokendashboard.domain.model.Day
 import de.neuland.tokendashboard.domain.model.DayRange
 import de.neuland.tokendashboard.domain.model.Granularity
+import de.neuland.tokendashboard.domain.model.ModelUsages
 import de.neuland.tokendashboard.domain.model.Provider.COPILOT
-import de.neuland.tokendashboard.domain.model.ProviderPluginUsage
-import de.neuland.tokendashboard.domain.model.ProviderUsageDetail
-import de.neuland.tokendashboard.domain.model.UsageResult
+import de.neuland.tokendashboard.domain.model.ProviderUsageByModel
+import de.neuland.tokendashboard.domain.model.ProviderUsageOverview
 import de.neuland.tokendashboard.domain.model.UserCount
 import de.neuland.tokendashboard.testsupport.fixedTimeFactory
 import de.neuland.tokendashboard.testsupport.testRoutingApp
@@ -45,12 +45,12 @@ class CopilotUsageRoutingTest :
         val copilotIngestService = mockk<IngestCopilotUsagePort>(relaxed = true)
 
         fun emptyOverview(range: DayRange) =
-            ProviderPluginUsage(
+            ProviderUsageOverview(
                 usage =
-                    ProviderUsageDetail(
+                    ProviderUsageByModel(
                         provider = COPILOT,
                         range = range,
-                        modelUsages = UsageResult.NoUsage,
+                        modelUsages = ModelUsages.NoUsage,
                     ),
                 activeUsersLast4Weeks = UserCount(0),
             )

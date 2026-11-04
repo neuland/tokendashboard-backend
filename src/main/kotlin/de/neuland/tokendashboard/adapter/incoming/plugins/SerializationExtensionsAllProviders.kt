@@ -1,9 +1,9 @@
 package de.neuland.tokendashboard.adapter.incoming.plugins
 
 import de.neuland.tokendashboard.domain.model.AllProviderSeriesBucket
-import de.neuland.tokendashboard.domain.model.AllProviderUsage
+import de.neuland.tokendashboard.domain.model.AllProviderTotals
 import de.neuland.tokendashboard.domain.model.AllProviderUsageSeries
-import de.neuland.tokendashboard.domain.model.ProviderUsage
+import de.neuland.tokendashboard.domain.model.UsageTotals
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -20,18 +20,18 @@ data class ProviderUsageDto(
     val totalCostUsdCent: Long,
 )
 
-fun AllProviderUsage.toResponse() =
+fun AllProviderTotals.toResponse() =
     AllProviderUsageDto(
         from = range.from.print(),
         to = range.to.print(),
-        providerUsages = providerUsages.values.associate { it.provider.name to it.toResponse() },
+        providerUsages = totals.byProvider.entries.associate { (provider, providerTotals) -> provider.name to providerTotals.toResponse() },
     )
 
-fun ProviderUsage.toResponse() =
+fun UsageTotals.toResponse() =
     ProviderUsageDto(
-        tokensInOut = tokensInOut.value,
-        totalEstimatedCo2 = totalEstimatedCo2.value,
-        totalCostUsdCent = totalCostUsdCent.value,
+        tokensInOut = tokensInOut().value,
+        totalEstimatedCo2 = estimatedCO2.value,
+        totalCostUsdCent = costUsdCent.value,
     )
 
 @Serializable

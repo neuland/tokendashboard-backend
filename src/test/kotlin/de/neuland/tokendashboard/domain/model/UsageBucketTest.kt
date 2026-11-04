@@ -11,7 +11,7 @@ class UsageBucketTest :
             val bucket =
                 UsageBucket(
                     date = Day(LocalDate.of(2026, 6, 15)),
-                    modelUsages = UsageResult.NoUsage,
+                    modelUsages = ModelUsages.NoUsage,
                     pluginInstallations = UserCount(0),
                 )
 
@@ -49,7 +49,7 @@ class UsageBucketTest :
             val bucket =
                 UsageBucket(
                     date = Day(LocalDate.of(2026, 6, 15)),
-                    modelUsages = UsageResult.HasUsage(listOf(sonnet, haiku).toNonEmptyListOrNull()!!),
+                    modelUsages = ModelUsages.HasUsage(listOf(sonnet, haiku).toNonEmptyListOrNull()!!),
                     pluginInstallations = UserCount(0),
                 )
 

@@ -16,17 +16,25 @@ import de.neuland.tokendashboard.adapter.outgoing.repository.UserRepositoryAdapt
 import de.neuland.tokendashboard.application.AllUsageQueryService
 import de.neuland.tokendashboard.application.AllUsageSeriesQueryService
 import de.neuland.tokendashboard.application.ClaudeUsageIngestService
+import de.neuland.tokendashboard.application.ClaudeUsageSource
+import de.neuland.tokendashboard.application.Co2FactorHistoryQueryService
 import de.neuland.tokendashboard.application.CopilotUsageIngestService
+import de.neuland.tokendashboard.application.CopilotUsageSource
 import de.neuland.tokendashboard.application.CurrentPricesQueryService
 import de.neuland.tokendashboard.application.OpenCodeUsageIngestService
+import de.neuland.tokendashboard.application.OpenCodeUsageSource
+import de.neuland.tokendashboard.application.PriceHistoryQueryService
 import de.neuland.tokendashboard.application.ProviderUsageQueryService
 import de.neuland.tokendashboard.application.ProviderUsageSeriesQueryService
+import de.neuland.tokendashboard.application.ProviderUsageSources
 import de.neuland.tokendashboard.application.port.incoming.IngestClaudeUsagePort
 import de.neuland.tokendashboard.application.port.incoming.IngestCopilotUsagePort
 import de.neuland.tokendashboard.application.port.incoming.IngestOpenCodeUsagePort
 import de.neuland.tokendashboard.application.port.incoming.QueryAllUsagePort
 import de.neuland.tokendashboard.application.port.incoming.QueryAllUsageSeriesPort
+import de.neuland.tokendashboard.application.port.incoming.QueryCo2FactorHistoryPort
 import de.neuland.tokendashboard.application.port.incoming.QueryCurrentPricesPort
+import de.neuland.tokendashboard.application.port.incoming.QueryPriceHistoryPort
 import de.neuland.tokendashboard.application.port.incoming.QueryProviderUsagePort
 import de.neuland.tokendashboard.application.port.incoming.QueryProviderUsageSeriesPort
 import de.neuland.tokendashboard.application.port.outgoing.ClaudePriceRepositoryPort
@@ -63,12 +71,18 @@ val repositoryModule =
 
 val serviceModule =
     module {
-        single<IngestClaudeUsagePort> { ClaudeUsageIngestService(get(), get(), get(), get()) }
-        single<IngestCopilotUsagePort> { CopilotUsageIngestService(get(), get(), get()) }
-        single<IngestOpenCodeUsagePort> { OpenCodeUsageIngestService(get(), get(), get()) }
-        single<QueryProviderUsagePort> { ProviderUsageQueryService(get(), get(), get(), get()) }
-        single<QueryProviderUsageSeriesPort> { ProviderUsageSeriesQueryService(get(), get(), get(), get()) }
-        single<QueryAllUsagePort> { AllUsageQueryService(get(), get(), get()) }
-        single<QueryAllUsageSeriesPort> { AllUsageSeriesQueryService(get(), get(), get(), get()) }
+        single { ClaudeUsageSource(get(), get(), get()) }
+        single { CopilotUsageSource(get(), get()) }
+        single { OpenCodeUsageSource(get(), get()) }
+        single { ProviderUsageSources(get<ClaudeUsageSource>(), get<CopilotUsageSource>(), get<OpenCodeUsageSource>()) }
+        single<IngestClaudeUsagePort> { ClaudeUsageIngestService(get(), get()) }
+        single<IngestCopilotUsagePort> { CopilotUsageIngestService(get(), get()) }
+        single<IngestOpenCodeUsagePort> { OpenCodeUsageIngestService(get(), get()) }
+        single<QueryProviderUsagePort> { ProviderUsageQueryService(get(), get()) }
+        single<QueryProviderUsageSeriesPort> { ProviderUsageSeriesQueryService(get(), get()) }
+        single<QueryAllUsagePort> { AllUsageQueryService(get()) }
+        single<QueryAllUsageSeriesPort> { AllUsageSeriesQueryService(get(), get()) }
         single<QueryCurrentPricesPort> { CurrentPricesQueryService(get(), get()) }
+        single<QueryPriceHistoryPort> { PriceHistoryQueryService(get()) }
+        single<QueryCo2FactorHistoryPort> { Co2FactorHistoryQueryService(get()) }
     }

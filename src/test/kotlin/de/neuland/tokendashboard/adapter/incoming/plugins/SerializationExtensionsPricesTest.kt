@@ -1,10 +1,14 @@
 package de.neuland.tokendashboard.adapter.incoming.plugins
 
 import de.neuland.tokendashboard.domain.model.CentPerMillionToken
+import de.neuland.tokendashboard.domain.model.ClaudePriceVersion
+import de.neuland.tokendashboard.domain.model.ClaudePriceVersions
 import de.neuland.tokendashboard.domain.model.ClaudePrices
+import de.neuland.tokendashboard.domain.model.Day
 import de.neuland.tokendashboard.domain.model.ModelFamily
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import java.time.LocalDate
 
 class SerializationExtensionsPricesTest :
     FunSpec({
@@ -39,6 +43,23 @@ class SerializationExtensionsPricesTest :
             val dto = prices(cacheWrite1h = 40).toResponse()
 
             dto.cacheWriteCentPerMillion shouldBe dto.cacheWrite1hCentPerMillion
+        }
+
+        test("maps a price version with its family and ISO validity date") {
+            val dto =
+                ClaudePriceVersions(
+                    listOf(
+                        ClaudePriceVersion(
+                            ModelFamily("sonnet"),
+                            Day(LocalDate.of(2026, 8, 12)),
+                            prices(input = 200),
+                        ),
+                    ),
+                ).toResponse().first()
+
+            dto.modelFamily shouldBe "sonnet"
+            dto.validFrom shouldBe "2026-08-12"
+            dto.prices shouldBe prices(input = 200).toResponse()
         }
 
         test("maps a map of families keyed by family name") {

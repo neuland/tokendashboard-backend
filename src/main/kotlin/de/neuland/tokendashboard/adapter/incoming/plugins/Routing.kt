@@ -10,7 +10,9 @@ import de.neuland.tokendashboard.application.port.incoming.IngestCopilotUsagePor
 import de.neuland.tokendashboard.application.port.incoming.IngestOpenCodeUsagePort
 import de.neuland.tokendashboard.application.port.incoming.QueryAllUsagePort
 import de.neuland.tokendashboard.application.port.incoming.QueryAllUsageSeriesPort
+import de.neuland.tokendashboard.application.port.incoming.QueryCo2FactorHistoryPort
 import de.neuland.tokendashboard.application.port.incoming.QueryCurrentPricesPort
+import de.neuland.tokendashboard.application.port.incoming.QueryPriceHistoryPort
 import de.neuland.tokendashboard.application.port.incoming.QueryProviderUsagePort
 import de.neuland.tokendashboard.application.port.incoming.QueryProviderUsageSeriesPort
 import de.neuland.tokendashboard.domain.model.Day
@@ -47,6 +49,8 @@ fun Application.configureRouting() {
     val allUsageQueryService: QueryAllUsagePort by inject()
     val allUsageSeriesQueryService: QueryAllUsageSeriesPort by inject()
     val currentPricesQueryService: QueryCurrentPricesPort by inject()
+    val priceHistoryQueryService: QueryPriceHistoryPort by inject()
+    val co2FactorHistoryQueryService: QueryCo2FactorHistoryPort by inject()
     val databaseHealthCheck: DatabaseHealthCheck by inject()
 
     routing {
@@ -127,6 +131,14 @@ fun Application.configureRouting() {
             call.respond(currentPricesQueryService.queryCurrentPrices().toResponse())
         }
 
+        get("/api/prices/claude/history") {
+            call.respond(priceHistoryQueryService.queryPriceHistory().toResponse())
+        }
+
+        get("/api/co2-factors/claude") {
+            call.respond(co2FactorHistoryQueryService.queryCo2FactorHistory().toResponse())
+        }
+
         post("/api/usage/ingest/claude") {
             requireBodyWithinLimit(call.request.contentLength())
             val request = call.receive<ClaudeUsageReport>()
@@ -145,10 +157,7 @@ fun Application.configureRouting() {
             requireBodyWithinLimit(call.request.contentLength())
             val request = call.receive<OpenCodeUsageReport>()
             val command = request.toCommand()
-            // toCommand() returns null when all entries were noise; that is a successful ingest of nothing.
-            if (command != null) {
-                openCodeIngestService.ingest(command)
-            }
+            openCodeIngestService.ingest(command)
             call.respond(HttpStatusCode.Created)
         }
     }

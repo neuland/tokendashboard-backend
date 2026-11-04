@@ -8,6 +8,5 @@ data class OpenCodeUsageRecord(
     val promptId: PromptId,
     val tokens: TokenCounts,
     val costNanoCent: NanoCent,
-    val co2Gram: Co2Gram,
     val pluginVersion: PluginVersion,
 )

@@ -1,12 +1,23 @@
 package de.neuland.tokendashboard.integrationtests
 
+import de.neuland.tokendashboard.adapter.outgoing.plugins.applyReportingTimeZone
 import org.flywaydb.core.Flyway
+import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
+import org.jdbi.v3.core.spi.JdbiPlugin
 import org.jdbi.v3.postgres.PostgresPlugin
 import org.jdbi.v3.sqlobject.kotlin.KotlinSqlObjectPlugin
 import org.postgresql.ds.PGSimpleDataSource
 import org.testcontainers.containers.PostgreSQLContainer
+
+private const val REPORTING_TIME_ZONE = "UTC"
+
+// Mirrors the connectionInitSql in configureDatabase: without it the driver uses the JVM's time zone, so
+// seeded timestamps without an offset and the day buckets would depend on the machine running the tests.
+private object FixedSessionTimeZonePlugin : JdbiPlugin {
+    override fun customizeHandle(handle: Handle): Handle = handle.also { it.execute("SET TIME ZONE '$REPORTING_TIME_ZONE'") }
+}
 
 class TestDatabase {
     private val container: PostgreSQLContainer<Nothing>? =
@@ -47,10 +58,13 @@ class TestDatabase {
                 .load()
         flyway.clean()
         flyway.migrate()
-        return Jdbi
-            .create(ds)
-            .installPlugin(KotlinPlugin())
-            .installPlugin(KotlinSqlObjectPlugin())
-            .installPlugin(PostgresPlugin())
+        val jdbi =
+            Jdbi
+                .create(ds)
+                .installPlugin(KotlinPlugin())
+                .installPlugin(KotlinSqlObjectPlugin())
+                .installPlugin(PostgresPlugin())
+                .installPlugin(FixedSessionTimeZonePlugin)
+        return applyReportingTimeZone(jdbi, REPORTING_TIME_ZONE)
     }
 }
