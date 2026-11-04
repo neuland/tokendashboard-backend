@@ -84,7 +84,8 @@ const buildDate = formatDate(
   locale,
 );
 
-const brandMark =
+/** The neuland logo, shown next to the credit in the sidebar footer. */
+const neulandMark =
   'M70.29,75.2h15.8v-28.87h-15.8v-11.58C70.29,15.55,54.55,0,35.14,0S0,15.55,0,34.74v40.46h30.88v-42.53c0-2.33,1.91-4.21,4.26-4.21s4.26,1.88,4.26,4.21v42.53h30.88Z';
 ---
 
@@ -122,7 +123,7 @@ const brandMark =
     <div class="app-shell">
       <header class="app-topbar">
         <a href={pageUrl()} class="app-brand" aria-label={t.layout.homeAriaLabel}>
-          <svg class="app-brand__mark" viewBox="0 0 86 76" aria-hidden="true"><path fill="currentColor" d={brandMark}></path></svg>
+          <img class="app-brand__mark" src={`${base}logo-mark.svg`} alt="" width="26" height="26" />
           <span class="app-brand__text">{COMPANY_NAME || 'neuland'}<span class="app-brand__sub">{t.layout.brandSub}</span></span>
         </a>
         <button type="button" class="app-menu-btn" aria-label={t.nav.menuOpen} aria-controls="app-sidebar" aria-expanded="false" data-app-menu>
@@ -138,7 +139,7 @@ const brandMark =
           </button>
         </div>
         <a href={pageUrl()} class="app-brand" aria-label={t.layout.homeAriaLabel}>
-          <svg class="app-brand__mark" viewBox="0 0 86 76" aria-hidden="true"><path fill="currentColor" d={brandMark}></path></svg>
+          <img class="app-brand__mark" src={`${base}logo-mark.svg`} alt="" width="26" height="26" />
           <span class="app-brand__text app-fade">{COMPANY_NAME || 'neuland'}<span class="app-brand__sub">{t.layout.brandSub}</span></span>
         </a>
         <div class="app-sidebar__toggle">
@@ -196,7 +197,7 @@ const brandMark =
             ))}
           </span>
           <span>{t.nav.build(buildDate)}</span>
-          <span>{t.layout.footerCredit} <a class="app-credit-link" href="https://neuland-bfi.de" target="_blank" rel="noopener noreferrer">neuland - Büro für Informatik</a></span>
+          <span>{t.layout.footerCredit} <a class="app-credit-link" href="https://neuland-bfi.de" target="_blank" rel="noopener noreferrer"><svg class="app-credit-mark" viewBox="0 0 86 76" aria-hidden="true"><path fill="currentColor" d={neulandMark}></path></svg>neuland - Büro für Informatik</a></span>
         </div>
       </aside>
       <div class="app-backdrop" data-app-backdrop></div>

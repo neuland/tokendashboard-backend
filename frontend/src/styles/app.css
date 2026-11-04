@@ -123,7 +123,7 @@ html.app-collapsed .app-sidebar__foot { opacity: 0; visibility: hidden; transiti
 /* In the sidebar the 26px mark is centred on the 16px nav-icon column (centre x 36),
    so it sits in the middle of the collapsed rail and never moves when toggling. */
 .app-sidebar .app-brand { padding-left: 7px; }
-.app-brand__mark { width: 26px; height: 23px; color: var(--neuland-primary); flex-shrink: 0; }
+.app-brand__mark { width: 26px; height: 26px; flex-shrink: 0; }
 .app-brand__text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
 .app-brand__text > * { overflow: hidden; white-space: nowrap; }
 .app-brand__sub { font-weight: var(--fw-book); font-size: 12px; color: var(--app-muted); }
@@ -181,6 +181,8 @@ html.app-collapsed .app-sidebar__foot { opacity: 0; visibility: hidden; transiti
 .app-locale a, .app-locale span { color: inherit; }
 .app .app-credit-link { color: var(--app-accent-text); text-decoration: underline; text-underline-offset: 2px; }
 .app .app-credit-link:hover { color: var(--app-ink); }
+/* The neuland logo in front of the credit: about the height of the 12px text */
+.app-credit-mark { display: inline-block; width: 12px; height: 11px; margin-right: 4px; vertical-align: -1px; color: var(--neuland-primary); }
 .app-locale strong { color: var(--app-ink); }
 
 /* Mobile top bar + drawer: hidden on desktop */

@@ -1,3 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 86 76">
-  <path fill="#FF5A55" d="M70.29,75.2h15.8v-28.87h-15.8v-11.58C70.29,15.55,54.55,0,35.14,0S0,15.55,0,34.74v40.46h30.88v-42.53c0-2.33,1.91-4.21,4.26-4.21s4.26,1.88,4.26,4.21v42.53h30.88Z"></path>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="0.5" y="0.5" width="63" height="63" rx="14" fill="#FFFFFF" stroke="#E6E8EC"/>
+  <g fill="#FF5A55">
+    <rect x="8"  y="46" width="13" height="9" rx="3"/>
+    <rect x="8"  y="35" width="13" height="9" rx="3"/>
+    <rect x="8"  y="24" width="13" height="9" rx="3"/>
+    <rect x="8"  y="13" width="13" height="9" rx="3"/>
+  </g>
+  <g fill="#77C4B4">
+    <rect x="25.5" y="46" width="13" height="9" rx="3"/>
+    <rect x="25.5" y="35" width="13" height="9" rx="3"/>
+  </g>
+  <g fill="#0EA19C">
+    <rect x="43" y="46" width="13" height="9" rx="3"/>
+    <rect x="43" y="35" width="13" height="9" rx="3"/>
+    <rect x="43" y="24" width="13" height="9" rx="3"/>
+  </g>
 </svg>
