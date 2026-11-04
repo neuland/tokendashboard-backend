@@ -1,6 +1,5 @@
 package de.neuland.tokendashboard.adapter.incoming.plugins
 
-import de.neuland.tokendashboard.domain.model.ClaudePriceVersions
 import de.neuland.tokendashboard.domain.model.ClaudePrices
 import de.neuland.tokendashboard.domain.model.ModelFamily
 import kotlinx.serialization.Serializable
@@ -15,13 +14,6 @@ data class ClaudePricesDto(
     val cacheReadCentPerMillion: Long,
 )
 
-@Serializable
-data class ClaudePriceVersionDto(
-    val modelFamily: String,
-    val validFrom: String,
-    val prices: ClaudePricesDto,
-)
-
 fun ClaudePrices.toResponse() =
     ClaudePricesDto(
         inputCentPerMillion = inputCentPerMillion.value,
@@ -33,12 +25,3 @@ fun ClaudePrices.toResponse() =
     )
 
 fun Map<ModelFamily, ClaudePrices>.toResponse(): Map<String, ClaudePricesDto> = mapKeys { it.key.value }.mapValues { it.value.toResponse() }
-
-fun ClaudePriceVersions.toResponse() =
-    this.versions.map {
-        ClaudePriceVersionDto(
-            modelFamily = it.family.value,
-            validFrom = it.validFrom.print(),
-            prices = it.prices.toResponse(),
-        )
-    }

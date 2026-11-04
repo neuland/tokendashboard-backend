@@ -52,12 +52,6 @@ family (input/output/cache-write/cache-read, cent per million tokens). The
 Claude plugin fetches this on update to show users their own costs. See
 [docs/decisions.md](docs/decisions.md#5-claude-prices-single-source-via-endpoint-not-a-duplicated-file).
 
-`GET /api/prices/claude/history` and `GET /api/co2-factors/claude` return
-every version of the prices and CO₂ factors with its `validFrom` date, keyed
-by the same model family names. They let the plugin evaluate its local usage
-history with the values that were valid on each day, without keeping its own
-copy of either table.
-
 ## Series return number of installations, not users at bucket day
 
 **`pluginInstallations` semantics**: Number of installations that are “active” on the bucket day, defined as:

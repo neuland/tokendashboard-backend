@@ -47,13 +47,6 @@ The Claude plugin needs the same per-model prices (`claude_prices` table) as
 the backend, to show users their own costs. `GET /api/prices/claude` returns
 the currently valid price per model family straight from the table.
 
-For the plugin's local usage history, `GET /api/prices/claude/history` and
-`GET /api/co2-factors/claude` return every version of both tables with its
-`validFrom` date. Local entries span price changes (sonnet changed on
-2026-08-12), so current values alone would misprice older days. The family
-names are the keys of both routes, which is also how the plugin maps a model
-id to its family — no second copy of the mapping rule.
-
 ## 6. Series return number of installations, not users at bucket day
 
 **`pluginInstallations` semantics**: number of installations "active" on
@@ -91,8 +84,7 @@ and plugin↔backend routes are versioned differently as a result:
   `/api/usage/ingest/claude` route would instantly break every org still on
   the old backend. These routes (`POST
   /api/usage/ingest/{claude,copilot,opencode}`, and `GET
-  /api/prices/claude`, `/api/prices/claude/history` and
-  `/api/co2-factors/claude`, which the Claude plugin also calls) stay unversioned
+  /api/prices/claude`, which the Claude plugin also calls) stay unversioned
   and additive-only forever: only add optional fields, never remove or
   rename. This keeps the plugin usable straight from GitHub, with zero
   per-org adjustment.
