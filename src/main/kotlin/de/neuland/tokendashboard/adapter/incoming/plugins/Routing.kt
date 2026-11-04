@@ -145,10 +145,7 @@ fun Application.configureRouting() {
             requireBodyWithinLimit(call.request.contentLength())
             val request = call.receive<OpenCodeUsageReport>()
             val command = request.toCommand()
-            // toCommand() returns null when all entries were noise; that is a successful ingest of nothing.
-            if (command != null) {
-                openCodeIngestService.ingest(command)
-            }
+            openCodeIngestService.ingest(command)
             call.respond(HttpStatusCode.Created)
         }
     }

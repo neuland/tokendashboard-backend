@@ -8,24 +8,6 @@ import java.time.LocalDate
 interface ClaudePriceRepository {
     @SqlQuery(
         """
-        SELECT model, input_cent_per_million, output_cent_per_million,
-               cache_write_5m_cent_per_million, cache_write_1h_cent_per_million,
-               cache_read_cent_per_million
-        FROM claude_prices
-        WHERE model = :model
-          AND valid_from <= :date
-        ORDER BY valid_from DESC
-        LIMIT 1
-        """,
-    )
-    @RegisterKotlinMapper(PriceRow::class)
-    fun findLatestPriceFor(
-        @Bind("model") model: String,
-        @Bind("date") date: LocalDate,
-    ): PriceRow?
-
-    @SqlQuery(
-        """
         SELECT DISTINCT ON (model) model, input_cent_per_million, output_cent_per_million,
                cache_write_5m_cent_per_million, cache_write_1h_cent_per_million,
                cache_read_cent_per_million
@@ -38,4 +20,16 @@ interface ClaudePriceRepository {
     fun findAllLatestPrices(
         @Bind("date") date: LocalDate,
     ): List<PriceRow>
+
+    @SqlQuery(
+        """
+        SELECT model, valid_from, input_cent_per_million, output_cent_per_million,
+               cache_write_5m_cent_per_million, cache_write_1h_cent_per_million,
+               cache_read_cent_per_million
+        FROM claude_prices
+        ORDER BY model, valid_from
+        """,
+    )
+    @RegisterKotlinMapper(PriceVersionRow::class)
+    fun findAllPriceVersions(): List<PriceVersionRow>
 }

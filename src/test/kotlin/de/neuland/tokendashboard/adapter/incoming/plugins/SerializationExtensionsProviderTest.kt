@@ -1,19 +1,23 @@
 package de.neuland.tokendashboard.adapter.incoming.plugins
 
 import de.neuland.tokendashboard.domain.model.Co2Gram
+import de.neuland.tokendashboard.domain.model.Day
+import de.neuland.tokendashboard.domain.model.DayRange
 import de.neuland.tokendashboard.domain.model.DollarCent
 import de.neuland.tokendashboard.domain.model.ModelName
 import de.neuland.tokendashboard.domain.model.ModelUsage
+import de.neuland.tokendashboard.domain.model.ModelUsages
 import de.neuland.tokendashboard.domain.model.Provider.CLAUDE
 import de.neuland.tokendashboard.domain.model.Provider.COPILOT
 import de.neuland.tokendashboard.domain.model.Provider.OPENCODE
+import de.neuland.tokendashboard.domain.model.ProviderUsageByModel
 import de.neuland.tokendashboard.domain.model.TokenCount
 import de.neuland.tokendashboard.domain.model.TokenCounts
-import de.neuland.tokendashboard.domain.model.UsageResult
-import de.neuland.tokendashboard.domain.model.toUsageResult
+import de.neuland.tokendashboard.domain.model.toModelUsages
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import java.time.LocalDate
 
 class SerializationExtensionsProviderTest :
     FunSpec({
@@ -38,20 +42,25 @@ class SerializationExtensionsProviderTest :
             estimatedCO2 = Co2Gram(estimatedCo2),
         )
 
+        val range = DayRange.of(Day(LocalDate.of(2026, 6, 1)), Day(LocalDate.of(2026, 6, 15)))
+
         // `overallTotalTokens` is absent from the JSON, rather than a zero-filled
         // object, for a provider with no usage at all.
-        test("sumUp returns null for no usage") {
-            sumUp(UsageResult.NoUsage).shouldBeNull()
+        test("overallTotalTokens is null for no usage") {
+            ProviderUsageByModel(CLAUDE, range, ModelUsages.NoUsage)
+                .toResponse()
+                .provider.overallTotalTokens
+                .shouldBeNull()
         }
 
-        test("sumUp sums every field across models") {
+        test("overallTotalTokens sums every field across models") {
             val usage =
                 listOf(
                     modelUsage("claude-sonnet-4-5", 1, 20, 300, 4000, 5, 60.0),
                     modelUsage("claude-opus-4-5", 7, 80, 900, 1000, 11, 22.0),
-                ).toUsageResult()
+                ).toModelUsages()
 
-            val result = sumUp(usage)!!
+            val result = ProviderUsageByModel(CLAUDE, range, usage).toResponse().provider.overallTotalTokens!!
 
             result.inputTokens shouldBe 8
             result.outputTokens shouldBe 100

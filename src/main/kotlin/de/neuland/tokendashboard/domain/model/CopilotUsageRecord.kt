@@ -6,6 +6,5 @@ data class CopilotUsageRecord(
     val sessionId: SessionId,
     val tokens: TokenCounts,
     val nanoAiu: NanoAiu,
-    val co2Gram: Co2Gram,
     val pluginVersion: PluginVersion,
 )

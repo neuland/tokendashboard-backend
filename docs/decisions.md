@@ -129,116 +129,85 @@ Why:
   free of logic. If your system uses a different price, change it here too,
   so the plugin's status line shows your price.
 
-## 9. Cost stored as cents (`BIGINT`), CO₂ stored as grams (`DOUBLE PRECISION`)
+## 9. Cost and CO₂ are calculated on read, not stored
+
+Usage records store only what the plugins report: token counts, plus the
+provider's own raw cost value where one exists (see decision 12). Cost and CO₂
+are calculated when usage is read, from the price and CO₂ factor tables
+valid on each usage day. Correcting a price or factor therefore applies
+retroactively, without touching usage records.
 
 Costs and CO₂ are estimates, not billing-grade figures — pricing and CO₂
 factors are themselves approximations (see decision 3), and the dashboard's
 purpose is trend visibility, not exact accounting.
 
-- **Cost**: stored as whole cents (`BIGINT`, banker's rounding at ingest).
-  Not scaled to sub-cent units; very cheap requests may round to 0 cents,
-  which is accepted. Chosen over `NUMERIC`/`DOUBLE PRECISION` for
-  human-readable values in the DB and exact, simple integer addition when
-  aggregating.
-- **CO₂**: stored in grams as `DOUBLE PRECISION`, since some records fall
-  below 1 gram and an integer type is not viable. `NUMERIC` was considered
-  but rejected: the main use case is aggregation, and exactness is
-  explicitly not a goal here either — the underlying CO₂ factors are
-  approximations, so `NUMERIC`'s exact-decimal guarantees would not reflect
-  any real precision in the data.
+- **Cost**: whole cents (see decision 11). Very cheap usage may round to 0
+  cents, which is accepted.
+- **CO₂**: grams as a floating-point value, since daily usage of a model can
+  fall below 1 gram. Exact decimals were rejected: the underlying CO₂ factors
+  are approximations, so exactness would not reflect any real precision.
 
-If a future need for finer-grained cost tracking arises (e.g. per-token
-pricing well below a cent, or a business requirement for exact billing),
-revisit the cents/`BIGINT` choice rather than silently rounding harder.
+If a future need for finer-grained cost tracking arises (e.g. a business
+requirement for exact billing), revisit the whole-cent rounding rather than
+silently rounding harder.
 
 ## 10. Missing price/CO₂ factor defaults to 0, not a distinct "unknown" state
 
-When a model/day has no matching entry in the price or CO₂ factor table
-(e.g. a new model was used before its price was added), `ClaudeUsageIngestService`
-stores `costUsdCent`/`co2Gram` as `0` rather than modeling "unknown" as its own
-type. A `logger.warn` is emitted at ingest time.
+Prices and CO₂ factors are versioned per model family by `validFrom` date.
+For a usage day, the latest version valid on that day applies. If the day
+lies before the oldest version, the oldest version applies: a model's list
+price is assumed to hold from its release on. A model family without any
+price or factor gets cost/CO₂ `0`, rather than modeling "unknown" as its own
+type.
 
 This is deliberate, not an oversight:
 
 - The dashboard breaks usage down per model, so a model showing "0 cost/CO2"
   while clearly having usage is self-evidently wrong and gets noticed without
   needing a dedicated "unknown" indicator.
-- The fix is operational, not code: look up the correct price/factor, insert it
-  into the `claude_prices`/`co2_factors` table, and re-ingest or backfill the
-  affected historical records for that model.
+- The fix is operational, not code: insert the correct price/factor into the
+  `claude_prices`/`co2_factors` table. Since cost and CO₂ are calculated on
+  read (decision 9), this also corrects all historical figures.
 - Modeling "unknown" as a distinct type would ripple into every consumer
   (aggregation, serialization, dashboard display) for a rare, self-correcting
   operational gap — not worth the complexity (see `.claude/system/codestyle.md`,
   "Pragmatism > Dogma").
 
-## 11. Cost figures are estimates; per-model and total rounding may differ
+## 11. Cost is rounded to whole cents per day and model, then summed
 
-This applies only to providers that store cost in nano-precision (see
-decision 12) — currently OpenCode and Copilot, not Claude. For those
-providers, the *total* returned by the all-providers endpoint is computed by
-summing nano-precision cost across all matching records and rounding once,
-at the end. The *per-model* breakdown that each provider's own
-single-provider endpoint sums into its own overall total instead rounds cost
-to whole cents per model row first, and only then sums those already-rounded
-values.
+Every provider calculates cost per usage day and model and rounds it to a
+whole cent. All totals — per model over a range, per provider, across all
+providers — sum these already-rounded values. Every endpoint therefore
+reports the same figure for the same data, regardless of grouping.
 
-As a consequence, **the per-provider endpoint and the all-providers endpoint
-can report different cost figures for the same date range**, differing by up
-to roughly half a cent per model. The test suite encodes this for OpenCode:
-the all-providers total and the single-provider total for the same
-underlying data are expected to differ by a cent, with a `// rounding`
-comment marking the divergence as intentional. Claude cannot diverge this
-way: its per-record cost is already a whole cent at ingest, so there is no
-nano intermediate to round twice — summing the same whole-cent values in any
-grouping always produces the same total.
+Rounding once at the very end would be marginally more precise, but makes
+per-model figures and totals diverge by fractions of a cent per model. The
+figures are estimates (decision 9); consistency across endpoints is worth
+more than sub-cent precision.
 
-This is accepted, not an oversight to fix:
+## 12. Per-provider raw cost: none, or the plugin's own nano-precision value
 
-- The figures are order-of-magnitude estimates for internal reporting,
-  consistent with the CO2 estimate caveat already noted in README.md.
-  Cent-level precision across endpoints is not a goal.
-- Unifying the two rounding paths would require summing in nano-precision
-  everywhere and rounding once at the very end, including for per-model
-  figures. If the rounding is ever unified, this entry should be updated or removed.
+Providers differ in whether and how they report cost; each is a separate call.
+Where a raw cost value is stored, it is an integer column, never floating
+point, to avoid float rounding inconsistencies.
 
-## 12. Per-provider cost precision: whole cents vs. nano-precision
+**Claude** stores no cost. Its cost is calculated from token counts and the
+`claude_prices` table (decision 9).
 
-Providers store per-prompt cost at different precisions, and for different
-reasons — this is not one rule applied three times, it is three separate
-calls. A shared constraint underlies all three: cost is always stored as an
-integer column, never as floating point, to avoid the rounding
-inconsistencies float storage would introduce. What differs is which integer
-granularity each provider's column uses.
+**OpenCode** stores the plugin-reported cost as `NanoCent`, at a
+billion-times-finer resolution than a cent. A meaningful share of individual
+prompts cost less than one cent; rounding each prompt to a whole cent would
+turn it into `0` and discard cost that was actually incurred. Nano-precision
+keeps that value intact until it is summed per day and model (decision 11).
 
-**Claude** rounds the cost of a single prompt to a whole cent at ingest time
-and stores it as an integer cent column. This is safe because Claude's
-per-prompt costs are almost always well above a cent — whole-cent rounding
-loses nothing meaningful there.
-
-**OpenCode** stores cost as `NanoCent`, at a billion-times-finer resolution
-than a cent. Here a meaningful share of individual prompts cost less than
-one cent; rounding such a prompt to the nearest whole cent at ingest would
-store it as `0` and permanently discard cost that was actually incurred.
-Nano-precision keeps that value intact until it is summed with others, where
-it can add up to something significant.
-
-**Copilot** stores cost as `NanoAiu`, for a third, independent reason: the
-plugin already reports the cost from GitHub's own billing unit (the
-AI-Unit) at that same nano-scale precision, as an integer. Storing it
-as-is avoids an unnecessary rounding step, and keeps the AI-Unit available
-for other uses later — for example, if a CO2 factor is ever defined per
-AI-Unit. Whether Copilot's own per-prompt costs frequently fall below a cent
-is not the deciding factor here, unlike for OpenCode.
+**Copilot** stores cost as `NanoAiu`: the plugin already reports GitHub's own
+billing unit (the AI-Unit) at nano-scale precision, as an integer. Storing it
+as-is avoids an unnecessary conversion, and keeps the AI-Unit available for
+other uses later — for example, if a CO2 factor is ever defined per AI-Unit.
 
 A future provider should be evaluated on its own terms — its own per-prompt
 cost distribution, and the precision its own source data already provides —
 not assumed to match any existing provider's reasoning.
-
-This is a different situation from decision 10 (missing price/CO₂ factor
-defaults to 0): there, the price is *absent* from the lookup table. Here,
-the price is present and applied correctly — the cost is genuinely below the
-rounding threshold and rounds down to a stored `0`. Do not go looking for a
-missing price row for this case; there isn't one.
 
 ## 13. Copilot's `reasoning_tokens` are parsed but not added to output tokens; OpenCode's are
 
@@ -275,8 +244,23 @@ start re-sending open sessions, the conflict key here must widen to include
 a per-prompt identifier *first*, before that plugin change ships. Nothing in
 the plugin's own repository currently hints that this backend assumption
 exists.
+## 15. Day boundaries follow one configurable reporting time zone per deployment
 
-## 15. Total tokens count input and output only; cache tokens are shown separately
+Usage is grouped into days in a single time zone, set per deployment via
+`REPORTING_TIME_ZONE` (an IANA zone id, default `UTC`).
+
+- **One zone per deployment, not per viewer.** Everyone opening the
+  dashboard sees the same days and therefore the same figures, wherever they
+  are. Per-viewer zones would make totals depend on who is looking.
+- **Configurable rather than fixed to UTC.** A team in a time zone far from
+  UTC would otherwise see its working day split across two dashboard days.
+  The zone should match where most of the deployment's users work.
+
+Because cost and CO₂ are calculated on read (decision 9), changing the zone
+takes effect after a restart and regroups all historical usage as well;
+nothing has to be migrated.
+
+## 18. Total tokens count input and output only; cache tokens are shown separately
 
 The headline "total tokens" figure — company-wide and per provider — sums
 input and output tokens. Cache-write and cache-read tokens are excluded from
@@ -290,7 +274,7 @@ flatten real fluctuations into noise and make the figure incomparable over
 time. Excluding them keeps the total meaningful; keeping them visible
 elsewhere means nothing is dropped.
 
-## 16. Copilot cost is approximated at one US cent per AI unit
+## 19. Copilot cost is approximated at one US cent per AI unit
 
 Copilot cost is computed as 1 US cent per AI unit, from the AI-unit total
 the Copilot CLI reports per session (stored as `NanoAiu`, see decision 12).
@@ -302,5 +286,3 @@ Until it is, the approximation is used and labelled as such in the
 dashboard's FAQ. Storing the raw AI units keeps the quantity intact for a
 later, exact conversion — or for a CO₂ factor per AI unit, should one become
 available — and the historical data can then be recomputed.
-
-

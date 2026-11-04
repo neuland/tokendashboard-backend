@@ -103,6 +103,12 @@ Note that Claude inside the devcontainer is started with the parameter
 HTTP client env) with placeholder values — use it as the starting point for
 your own deployment.
 
+Set `REPORTING_TIME_ZONE` to the IANA time zone in which usage is grouped
+into days (e.g. `Europe/Berlin`, `Asia/Tokyo`; default `UTC`). It applies to
+all usage views and also decides which price and CO₂ factor version applies
+to a prompt near midnight. Changing it takes effect after a restart, for
+historical usage as well. See decision 15 in `docs/decisions.md`.
+
 ## Tests
 
 ```

@@ -72,7 +72,8 @@ class OpenCodeUsageIntegrationTest :
                 deepseekWith14.tokens.outputTokens shouldBe 200_000
                 deepseekWith14.tokens.cacheReadTokens shouldBe 20_000_000
                 deepseekWith14.tokens.cacheWriteTokens shouldBe 2_000_000
-                deepseekWith14.tokens.costUsdCent shouldBe 8
+                // rounded per day: 3.333333 (june 14) -> 3, 4.242424 (june 15) -> 4
+                deepseekWith14.tokens.costUsdCent shouldBe 7
                 deepseekWith14.tokens.estimatedCo2 shouldBe (0.0 plusOrMinus 0.2)
                 deepseekWith14.model shouldBe "deepseek-v4-pro"
 
@@ -81,7 +82,8 @@ class OpenCodeUsageIntegrationTest :
                 mimoWith14.tokens.outputTokens shouldBe 200_000
                 mimoWith14.tokens.cacheReadTokens shouldBe 20_000_000
                 mimoWith14.tokens.cacheWriteTokens shouldBe 2_000_000
-                mimoWith14.tokens.costUsdCent shouldBe 6
+                // rounded per day: 3.333333 (june 14) -> 3, 2.424242 (june 15) -> 2
+                mimoWith14.tokens.costUsdCent shouldBe 5
                 mimoWith14.tokens.estimatedCo2 shouldBe (0.0 plusOrMinus 0.2)
                 mimoWith14.model shouldBe "mimo-v2.5-free"
 
@@ -92,7 +94,7 @@ class OpenCodeUsageIntegrationTest :
                 with14.usage.provider.overallTotalTokens.outputTokens shouldBe 400_000
                 with14.usage.provider.overallTotalTokens.cacheReadTokens shouldBe 40_000_000
                 with14.usage.provider.overallTotalTokens.cacheWriteTokens shouldBe 4_000_000
-                with14.usage.provider.overallTotalTokens.costUsdCent shouldBe 14
+                with14.usage.provider.overallTotalTokens.costUsdCent shouldBe 12
                 with14.usage.provider.overallTotalTokens.estimatedCo2 shouldBe (0.0 plusOrMinus 0.2)
                 with14.activeUsersLast4Weeks shouldBe 3
 

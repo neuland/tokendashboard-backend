@@ -1,34 +1,21 @@
 package de.neuland.tokendashboard.application
 
 import de.neuland.tokendashboard.application.port.incoming.QueryAllUsagePort
-import de.neuland.tokendashboard.application.port.outgoing.ClaudeUsageRepositoryPort
-import de.neuland.tokendashboard.application.port.outgoing.CopilotUsageRepositoryPort
-import de.neuland.tokendashboard.application.port.outgoing.OpenCodeUsageRepositoryPort
-import de.neuland.tokendashboard.domain.model.AllProviderUsage
+import de.neuland.tokendashboard.domain.model.AllProviderTotals
 import de.neuland.tokendashboard.domain.model.DayRange
-import de.neuland.tokendashboard.domain.model.Provider
-import de.neuland.tokendashboard.domain.model.Provider.CLAUDE
-import de.neuland.tokendashboard.domain.model.Provider.COPILOT
-import de.neuland.tokendashboard.domain.model.Provider.OPENCODE
-import de.neuland.tokendashboard.domain.model.ProviderUsages
+import de.neuland.tokendashboard.domain.model.ProviderTotalsByProvider
+import de.neuland.tokendashboard.domain.model.totals
+import de.neuland.tokendashboard.domain.sumByModel
 
 class AllUsageQueryService(
-    private val claudeRepository: ClaudeUsageRepositoryPort,
-    private val copilotRepository: CopilotUsageRepositoryPort,
-    private val openCodeRepository: OpenCodeUsageRepositoryPort,
+    private val usageSources: ProviderUsageSources,
 ) : QueryAllUsagePort {
-    override fun queryAllUsage(range: DayRange): AllProviderUsage =
-        AllProviderUsage(
+    override fun queryAllUsage(range: DayRange): AllProviderTotals =
+        AllProviderTotals(
             range = range,
-            providerUsages =
-                ProviderUsages.of(
-                    Provider.entries.map { provider ->
-                        when (provider) {
-                            CLAUDE -> claudeRepository.claudeProviderUsage(range)
-                            COPILOT -> copilotRepository.copilotProviderUsage(range)
-                            OPENCODE -> openCodeRepository.openCodeProviderUsage(range)
-                        }
-                    },
-                ),
+            totals =
+                ProviderTotalsByProvider.forAllProviders { provider ->
+                    usageSources.of(provider).dailyUsage(range).sumByModel().totals()
+                },
         )
 }

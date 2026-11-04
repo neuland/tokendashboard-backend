@@ -200,9 +200,9 @@ class ClaudeUsageIntegrationTest :
                 sonnet.tokens.cacheReadTokens shouldBe 3034995 // 606999 * 5
                 // undated (136335 = 45445 * 3) + 5m (80000 = 40000 * 2) + 1h (10890 = 5445 * 2)
                 sonnet.tokens.cacheWriteTokens shouldBe 227225
-                // cost is rounded per prompt at ingestion, then summed — not rounded once on the aggregate:
-                // 2 split prompts @ 60 cent each (59.69847 rounded) + 3 legacy prompts @ 69 cent each (58.473345 rounded)
-                sonnet.tokens.costUsdCent shouldBe 327
+                // cost is summed per model and day, then rounded once:
+                // 2 split prompts @ 59.69847 cent + 3 legacy prompts @ 68.69847 cent = 325.49235 cent
+                sonnet.tokens.costUsdCent shouldBe 325
                 sonnet.tokens.estimatedCo2 shouldBe (78.09 plusOrMinus 0.05)
             }
         }

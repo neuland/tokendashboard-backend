@@ -12,7 +12,7 @@ import de.neuland.tokendashboard.domain.model.TokenCounts
 import de.neuland.tokendashboard.domain.model.UsageBucket
 import de.neuland.tokendashboard.domain.model.UsageSeries
 import de.neuland.tokendashboard.domain.model.UserCount
-import de.neuland.tokendashboard.domain.model.toUsageResult
+import de.neuland.tokendashboard.domain.model.toModelUsages
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -39,7 +39,7 @@ class SerializationExtensionsHistoryTest :
             val bucket =
                 UsageBucket(
                     date = Day(LocalDate.of(2026, 6, 15)),
-                    modelUsages = listOf(modelUsage("claude-sonnet-4-5")).toUsageResult(),
+                    modelUsages = listOf(modelUsage("claude-sonnet-4-5")).toModelUsages(),
                     pluginInstallations = UserCount(3),
                 )
 

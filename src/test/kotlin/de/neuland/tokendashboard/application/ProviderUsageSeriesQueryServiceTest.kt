@@ -1,25 +1,22 @@
 package de.neuland.tokendashboard.application
 
 import arrow.core.toNonEmptyListOrNull
-import de.neuland.tokendashboard.application.port.outgoing.ClaudeUsageRepositoryPort
-import de.neuland.tokendashboard.application.port.outgoing.CopilotUsageRepositoryPort
-import de.neuland.tokendashboard.application.port.outgoing.OpenCodeUsageRepositoryPort
 import de.neuland.tokendashboard.application.port.outgoing.UserRepositoryPort
 import de.neuland.tokendashboard.domain.model.Co2Gram
+import de.neuland.tokendashboard.domain.model.DatedModelUsages
 import de.neuland.tokendashboard.domain.model.Day
 import de.neuland.tokendashboard.domain.model.DayRange
 import de.neuland.tokendashboard.domain.model.DollarCent
 import de.neuland.tokendashboard.domain.model.Granularity
 import de.neuland.tokendashboard.domain.model.ModelName
 import de.neuland.tokendashboard.domain.model.ModelUsage
-import de.neuland.tokendashboard.domain.model.ModelUsagesAtDate
+import de.neuland.tokendashboard.domain.model.ModelUsages
 import de.neuland.tokendashboard.domain.model.Provider.CLAUDE
 import de.neuland.tokendashboard.domain.model.Provider.COPILOT
 import de.neuland.tokendashboard.domain.model.Provider.OPENCODE
 import de.neuland.tokendashboard.domain.model.TokenCount
 import de.neuland.tokendashboard.domain.model.TokenCounts
 import de.neuland.tokendashboard.domain.model.UsageBucket
-import de.neuland.tokendashboard.domain.model.UsageResult
 import de.neuland.tokendashboard.domain.model.UserCount
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -50,27 +47,25 @@ class ProviderUsageSeriesQueryServiceTest :
             )
 
         fun service(
-            claudeUsageRepository: ClaudeUsageRepositoryPort = mockk(),
-            copilotUsageRepository: CopilotUsageRepositoryPort = mockk(),
-            openCodeUsageRepository: OpenCodeUsageRepositoryPort = mockk(),
+            claudeUsageSource: ProviderUsageSource = mockk(),
+            copilotSource: ProviderUsageSource = mockk(),
+            openCodeSource: ProviderUsageSource = mockk(),
             userRepository: UserRepositoryPort = mockk(),
-        ) = ProviderUsageSeriesQueryService(claudeUsageRepository, copilotUsageRepository, openCodeUsageRepository, userRepository)
+        ) = ProviderUsageSeriesQueryService(ProviderUsageSources(claudeUsageSource, copilotSource, openCodeSource), userRepository)
 
-        test("delegates to the Claude repository when provider is CLAUDE") {
-            val usageRepository = mockk<ClaudeUsageRepositoryPort>()
+        test("delegates to the Claude usage source when provider is CLAUDE") {
+            val claudeUsageSource = mockk<ProviderUsageSource>()
             val userRepository = mockk<UserRepositoryPort>()
             val rangeSlot = slot<DayRange>()
             val granularitySlot = slot<Granularity>()
             val pluginRangeSlot = slot<DayRange>()
 
+            every { claudeUsageSource.dailyUsage(capture(rangeSlot)) } returns emptyList()
             every {
-                usageRepository.claudeUsageSeries(capture(rangeSlot), capture(granularitySlot))
-            } returns emptyList()
-            every {
-                userRepository.pluginInstallationsByDate(capture(pluginRangeSlot), any(), eq(CLAUDE))
+                userRepository.pluginInstallationsByDate(capture(pluginRangeSlot), capture(granularitySlot), eq(CLAUDE))
             } returns emptyMap()
 
-            service(claudeUsageRepository = usageRepository, userRepository = userRepository)
+            service(claudeUsageSource = claudeUsageSource, userRepository = userRepository)
                 .querySeries(CLAUDE, DayRange.of(from, to), granularity)
 
             rangeSlot.captured.from shouldBe from
@@ -80,98 +75,98 @@ class ProviderUsageSeriesQueryServiceTest :
             pluginRangeSlot.captured.to shouldBe to
         }
 
-        test("delegates to the Copilot repository when provider is COPILOT") {
-            val usageRepository = mockk<CopilotUsageRepositoryPort>()
+        test("delegates to the Copilot usage source when provider is COPILOT") {
+            val usageRepository = mockk<ProviderUsageSource>()
             val userRepository = mockk<UserRepositoryPort>()
 
-            every { usageRepository.copilotUsageSeries(any(), any()) } returns emptyList()
+            every { usageRepository.dailyUsage(any()) } returns emptyList()
             every { userRepository.pluginInstallationsByDate(any(), any(), eq(COPILOT)) } returns emptyMap()
 
             val result =
-                service(copilotUsageRepository = usageRepository, userRepository = userRepository)
+                service(copilotSource = usageRepository, userRepository = userRepository)
                     .querySeries(COPILOT, DayRange.of(from, to), granularity)
 
             result.buckets.shouldBeEmpty()
         }
 
-        test("delegates to the OpenCode repository when provider is OPENCODE") {
-            val usageRepository = mockk<OpenCodeUsageRepositoryPort>()
+        test("delegates to the OpenCode usage source when provider is OPENCODE") {
+            val usageRepository = mockk<ProviderUsageSource>()
             val userRepository = mockk<UserRepositoryPort>()
 
-            every { usageRepository.openCodeUsageSeries(any(), any()) } returns emptyList()
+            every { usageRepository.dailyUsage(any()) } returns emptyList()
             every { userRepository.pluginInstallationsByDate(any(), any(), eq(OPENCODE)) } returns emptyMap()
 
             val result =
-                service(openCodeUsageRepository = usageRepository, userRepository = userRepository)
+                service(openCodeSource = usageRepository, userRepository = userRepository)
                     .querySeries(OPENCODE, DayRange.of(from, to), granularity)
 
             result.buckets.shouldBeEmpty()
         }
 
         test("returns empty buckets list when there are no day-groups") {
-            val usageRepository = mockk<ClaudeUsageRepositoryPort>()
+            val claudeUsageSource = mockk<ProviderUsageSource>()
             val userRepository = mockk<UserRepositoryPort>()
-            every { usageRepository.claudeUsageSeries(any(), any()) } returns emptyList()
+            every { claudeUsageSource.dailyUsage(any()) } returns emptyList()
             every { userRepository.pluginInstallationsByDate(any(), any(), any()) } returns emptyMap()
 
             val result =
-                service(claudeUsageRepository = usageRepository, userRepository = userRepository)
+                service(claudeUsageSource = claudeUsageSource, userRepository = userRepository)
                     .querySeries(CLAUDE, DayRange.of(from, to), granularity)
 
             result.buckets.shouldBeEmpty()
         }
 
         test("produces one bucket per day-group with overallTotal matching sum of modelUsages") {
-            val usageRepository = mockk<ClaudeUsageRepositoryPort>()
+            val claudeUsageSource = mockk<ProviderUsageSource>()
             val userRepository = mockk<UserRepositoryPort>()
 
-            val day14Usages = UsageResult.HasUsage(listOf(modelUsage("sonnet"), modelUsage("haiku")).toNonEmptyListOrNull()!!)
-            val day15Usages = UsageResult.HasUsage(listOf(modelUsage("opus")).toNonEmptyListOrNull()!!)
+            val day14Usages = ModelUsages.HasUsage(listOf(modelUsage("sonnet"), modelUsage("haiku")).toNonEmptyListOrNull()!!)
+            val day15Usages = ModelUsages.HasUsage(listOf(modelUsage("opus")).toNonEmptyListOrNull()!!)
 
-            every { usageRepository.claudeUsageSeries(any(), any()) } returns
+            every { claudeUsageSource.dailyUsage(any()) } returns
                 listOf(
-                    ModelUsagesAtDate(from, day14Usages),
-                    ModelUsagesAtDate(to, day15Usages),
+                    DatedModelUsages(from, day14Usages),
+                    DatedModelUsages(to, day15Usages),
                 )
             every { userRepository.pluginInstallationsByDate(any(), any(), any()) } returns
                 mapOf(from to UserCount(3), to to UserCount(5))
 
             val result =
-                service(claudeUsageRepository = usageRepository, userRepository = userRepository)
+                service(claudeUsageSource = claudeUsageSource, userRepository = userRepository)
                     .querySeries(CLAUDE, DayRange.of(from, to), granularity)
 
             result.buckets shouldBe
                 listOf(
                     UsageBucket(
-                        date = from,
-                        modelUsages = day14Usages,
-                        pluginInstallations = UserCount(3),
-                    ),
-                    UsageBucket(
                         date = to,
                         modelUsages = day15Usages,
                         pluginInstallations = UserCount(5),
+                    ),
+                    UsageBucket(
+                        date = from,
+                        modelUsages = day14Usages,
+                        pluginInstallations = UserCount(3),
                     ),
                 )
         }
 
         test("pluginInstallations are matched by date, not position") {
-            val usageRepository = mockk<ClaudeUsageRepositoryPort>()
+            val claudeUsageSource = mockk<ProviderUsageSource>()
             val userRepository = mockk<UserRepositoryPort>()
 
-            val day14Usages = UsageResult.HasUsage(listOf(modelUsage("sonnet")).toNonEmptyListOrNull()!!)
-            val day15Usages = UsageResult.HasUsage(listOf(modelUsage("opus")).toNonEmptyListOrNull()!!)
+            val day14Usages = ModelUsages.HasUsage(listOf(modelUsage("sonnet")).toNonEmptyListOrNull()!!)
+            val day15Usages = ModelUsages.HasUsage(listOf(modelUsage("opus")).toNonEmptyListOrNull()!!)
 
-            every { usageRepository.claudeUsageSeries(any(), any()) } returns
+            every { claudeUsageSource.dailyUsage(any()) } returns
                 listOf(
-                    ModelUsagesAtDate(from, day14Usages),
-                    ModelUsagesAtDate(to, day15Usages),
+                    DatedModelUsages(from, day14Usages),
+                    DatedModelUsages(to, day15Usages),
                 )
             every { userRepository.pluginInstallationsByDate(any(), any(), any()) } returns
                 mapOf(to to UserCount(5), from to UserCount(3))
 
             val result =
-                service(claudeUsageRepository = usageRepository, userRepository = userRepository)
+                service(claudeUsageSource = claudeUsageSource, userRepository = userRepository)
                     .querySeries(CLAUDE, DayRange.of(from, to), granularity)
 
             result.buckets.first { it.date == from }.pluginInstallations shouldBe UserCount(3)
@@ -179,19 +174,41 @@ class ProviderUsageSeriesQueryServiceTest :
         }
 
         test("falls back to UserCount(0) when a day-group's date is missing from the plugin-installations map") {
-            val usageRepository = mockk<ClaudeUsageRepositoryPort>()
+            val claudeUsageSource = mockk<ProviderUsageSource>()
             val userRepository = mockk<UserRepositoryPort>()
 
-            val day14Usages = UsageResult.HasUsage(listOf(modelUsage("sonnet")).toNonEmptyListOrNull()!!)
+            val day14Usages = ModelUsages.HasUsage(listOf(modelUsage("sonnet")).toNonEmptyListOrNull()!!)
 
-            every { usageRepository.claudeUsageSeries(any(), any()) } returns
-                listOf(ModelUsagesAtDate(from, day14Usages))
+            every { claudeUsageSource.dailyUsage(any()) } returns
+                listOf(DatedModelUsages(from, day14Usages))
             every { userRepository.pluginInstallationsByDate(any(), any(), any()) } returns emptyMap()
 
             val result =
-                service(claudeUsageRepository = usageRepository, userRepository = userRepository)
+                service(claudeUsageSource = claudeUsageSource, userRepository = userRepository)
                     .querySeries(CLAUDE, DayRange.of(from, to), granularity)
 
             result.buckets.single().pluginInstallations shouldBe UserCount(0)
+        }
+
+        test("rolls Claude days up into weekly buckets keyed by monday for WEEK granularity") {
+            val claudeUsageSource = mockk<ProviderUsageSource>()
+            val userRepository = mockk<UserRepositoryPort>()
+            val tuesday = Day(LocalDate.of(2026, 6, 16))
+
+            every { claudeUsageSource.dailyUsage(any()) } returns
+                listOf(
+                    DatedModelUsages(tuesday, ModelUsages.HasUsage(listOf(modelUsage("sonnet")).toNonEmptyListOrNull()!!)),
+                    DatedModelUsages(to, ModelUsages.HasUsage(listOf(modelUsage("sonnet")).toNonEmptyListOrNull()!!)),
+                )
+            every { userRepository.pluginInstallationsByDate(any(), eq(Granularity.WEEK), any()) } returns mapOf(to to UserCount(4))
+
+            val result =
+                service(claudeUsageSource = claudeUsageSource, userRepository = userRepository)
+                    .querySeries(CLAUDE, DayRange.of(to, tuesday), Granularity.WEEK)
+
+            val bucket = result.buckets.single()
+            bucket.date shouldBe to
+            bucket.overallTotal.tokens.inputTokens shouldBe TokenCount(200)
+            bucket.pluginInstallations shouldBe UserCount(4)
         }
     })
