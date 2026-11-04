@@ -18,10 +18,9 @@ public disclosure.
 
 This is a static Astro site with no server-side logic of its own and **no
 authentication** — it renders whatever the backend's `/api/usage/*` endpoints
-return. It inherits the backend's trust model: see the
-[TokenDashboard](https://github.com/neuland/TokenDashboard) repository's
-`SECURITY.md` for why that API has no auth and must only run on a trusted
-network.
+return. It inherits the backend's trust model: see the backend's
+[`SECURITY.md`](../backend/SECURITY.md) for why that API has no auth and must only run
+on a trusted network.
 
 What that means concretely:
 

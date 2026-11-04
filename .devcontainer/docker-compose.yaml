@@ -1,0 +1,36 @@
+services:
+  dev:
+    build:
+      context: .
+    hostname: dev
+    volumes:
+      - ..:/workspaces/tokendashboard
+      - ~/.claude:/home/vscode/.claude
+      - ~/.claude.json:/tmp/host-claude.json:ro
+    environment:
+      - NODE_ENV=development
+      # Backend tests use the postgres service below instead of starting one via
+      # Testcontainers (TestDatabase.kt), as in CI — so the container needs no Docker.
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    ports:
+      - "4321:4321"
+    depends_on:
+      - postgres
+    command: sleep infinity
+    restart: unless-stopped
+
+  # Test database only: the tests wipe it (Flyway clean) on every run, so it lives in
+  # tmpfs and keeps nothing. Not published on the host, so it can't clash with the
+  # postgres from backend/docker-compose.yml on 5432.
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    tmpfs:
+      - /var/lib/postgresql/data
+    restart: unless-stopped

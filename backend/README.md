@@ -2,10 +2,8 @@
 
 Part of a system that measures a company's token usage. 
 It requires the backend, the frontend and at least one plugin that sends the data.  
-This is the backend repository.  
-The frontend can be found here:  
-https://github.com/neuland/tokendashboard-frontend  
-and the plugins here:  
+This is the backend; the frontend lives next to it in [`../frontend`](../frontend).  
+The plugins can be found here:  
 Claude: https://github.com/neuland/tokendashboard-plugin-claude  
 Copilot: https://github.com/neuland/tokendashboard-plugin-copilot  
 OpenCode: https://github.com/neuland/tokendashboard-plugin-opencode  
@@ -90,8 +88,9 @@ credentials, set `DATABASE_USER`/`DATABASE_PASSWORD` (or
 
 ### Devcontainer (optional)
 
-`.devcontainer/` provides a ready-to-use container with Claude Code
-preinstalled. It mounts your host `~/.claude`, so your existing settings,
+[`.devcontainer/`](../.devcontainer/) at the root of the monorepo provides one
+container for backend and frontend with Claude Code preinstalled (`just claude`
+from the root). It mounts your host `~/.claude`, so your existing settings,
 plugins and hooks work inside the container unchanged. Everything above
 works without it — the devcontainer is a convenience, not a requirement.
 Note that Claude inside the devcontainer is started with the parameter

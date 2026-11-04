@@ -11,8 +11,7 @@ contract changes), please open an issue first to discuss the approach. This
 avoids wasted effort if the direction doesn't fit the project.
 
 See [CLAUDE.md](CLAUDE.md) for import conventions and testing structure, and
-the backend's [TokenDashboard](https://github.com/neuland/TokenDashboard)
-repository for the API contract this frontend consumes.
+the [backend](../backend) next to it for the API contract this frontend consumes.
 
 ## Development setup
 

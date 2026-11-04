@@ -1,0 +1,13 @@
+# Subproject-specific ignores live in backend/.gitignore and frontend/.gitignore.
+.DS_Store
+.idea
+.vscode/
+
+# Deployment config stays with each installation (see examples/ on each side)
+/kustomize
+/infrastructure
+/infra
+/helm-charts
+/nginx
+/charts
+/deployment

@@ -1,3 +1,7 @@
+# Fixed project name: without it Compose would derive it from the folder (now backend/)
+# and start with a fresh volume instead of the existing tokendashboard-backend_postgres_data.
+name: tokendashboard-backend
+
 services:
   postgres:
     image: postgres:16-alpine

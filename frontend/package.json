@@ -5,7 +5,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neuland/tokendashboard-frontend.git"
+    "url": "git+https://github.com/neuland/tokendashboard.git",
+    "directory": "frontend"
   },
   "type": "module",
   "engines": {

@@ -2,10 +2,8 @@
 
 Part of a system that measures companies’ token usage.
 It requires the backend, the frontend and at least one plugin that sends the data.
-This is the frontend repository.   
-The backend can be found here:  
-https://github.com/neuland/tokendashboard-backend  
-and the plugins here:   
+This is the frontend; the backend lives next to it in [`../backend`](../backend).  
+The plugins can be found here:  
 Claude: https://github.com/neuland/tokendashboard-plugin-claude  
 Copilot: https://github.com/neuland/tokendashboard-plugin-copilot  
 OpenCode: https://github.com/neuland/tokendashboard-plugin-opencode
@@ -154,8 +152,9 @@ The production build emits a fully static site into `dist/`, served by
 
 - **Container:** multi-stage build (Node → nginx), see [`Dockerfile`](Dockerfile).
 - **CI:** the GitHub Actions workflow in
-  [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs lint, type-check, unit
-  and e2e tests on every push to `main` and every pull request. It does not build or
+  [`.github/workflows/frontend.yml`](../.github/workflows/frontend.yml) at the root of
+  the monorepo runs lint, type-check, unit and e2e tests on every push to `main` and
+  every pull request that changes `frontend/`. It does not build or
   publish an image — how and where the image is deployed is up to each installation.
 - **Deployment examples:** [`examples/`](examples/) holds generic, placeholder-valued
   starting points for your own pipeline — a GitLab CI pipeline
@@ -178,8 +177,9 @@ simply omitted from the page texts.
 
 ### Devcontainer (optional)
 
-`.devcontainer/` provides a ready-to-use container with Claude Code
-preinstalled. It mounts your host `~/.claude`, so your existing settings,
+[`.devcontainer/`](../.devcontainer/) at the root of the monorepo provides one
+container for backend and frontend with Claude Code preinstalled (`just claude`
+from the root). It mounts your host `~/.claude`, so your existing settings,
 plugins and hooks work inside the container unchanged. Everything above
 works without it — the devcontainer is a convenience, not a requirement.
 Note that Claude inside the devcontainer is started with the parameter
