@@ -43,7 +43,7 @@ dependencies {
     implementation("org.jdbi:jdbi3-postgres:$jdbiVersion")
 
     // PostgreSQL
-    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("org.postgresql:postgresql:42.7.14")
 
     // Connection Pooling
     implementation("com.zaxxer:HikariCP:6.2.1")
@@ -51,6 +51,11 @@ dependencies {
     // Flyway
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
+    constraints {
+        // Flyway 12 brings jackson-databind 3.1.4, which has known CVEs (up to CVE-2026-110879);
+        // 3.1.8 fixes them. Remove once Flyway itself requires a fixed version.
+        implementation("tools.jackson.core:jackson-databind:3.1.8")
+    }
 
     // Serialization & Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
@@ -59,7 +64,7 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koinVersion")
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.5.38")
+    implementation("ch.qos.logback:logback-classic:1.6.6")
 
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.insert-koin:koin-test:$koinVersion")
