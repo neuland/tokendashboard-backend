@@ -29,9 +29,14 @@ starts them with a database:
 docker compose up --build
 ```
 
-The dashboard then runs on <http://localhost:8088>; point the plugins at the same
-address. `PUBLIC_COMPANY_NAME`, `DATABASE_PASSWORD` and `TOKENDASHBOARD_PORT` can be set
-in the shell or in a `.env` next to the file. Needs Docker Compose 2.23 or newer.
+The dashboard then runs on <http://localhost:8088>. `PUBLIC_COMPANY_NAME`,
+`DATABASE_PASSWORD` and `TOKENDASHBOARD_PORT` can be set in the shell or in a `.env`
+next to the file. Needs Docker Compose 2.23 or newer.
+
+The dashboard stays empty until at least one plugin sends data, so install one next.
+Copy the install command from the dashboard itself, under "Install plugins" in the
+navigation (<http://localhost:8088/en/faq/#plugins>) or the "Install plugin" button on a
+provider page: it already carries the right `--api-base-url` for this instance.
 
 ### Claude Code in a devcontainer
 
