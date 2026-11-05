@@ -4,9 +4,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - Unreleased
+Backend and frontend share one version and are released together; each release is a
+`vX.Y.Z` tag on `main`. Decisions referenced below live in
+[`backend/docs/decisions.md`](backend/docs/decisions.md) unless noted otherwise.
 
-### Changed
+## [1.0.0] - Unreleased
+
+The first release. Earlier states of the two former repositories were development
+builds (0.x) without a release.
+
+### Backend
+
+#### Changed
 
 - **Cost and CO₂ are calculated on read instead of being stored per prompt.**
   Usage records now hold only what the plugins report: token counts, plus the
@@ -14,13 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   derived when usage is queried, from the price and CO₂ factor versions valid on
   each usage day. Adding or correcting a price or factor therefore applies to
   all historical figures immediately, without re-ingesting or backfilling data.
-  See decision 9 in `docs/decisions.md`.
+  See decision 9.
 - **Ingest no longer looks up prices or CO₂ factors.** Plugin requests only
   write token counts, so ingest time no longer depends on reference data.
 - **Cost is rounded to whole cents once per usage day and model, for every
   provider**, and all totals sum these values. Every endpoint now reports the
   same figure for the same data, regardless of grouping. Figures may differ
-  from 1.x by a few cents. See decision 11.
+  from the 0.x builds by a few cents. See decision 11.
 - **Usage dated before the first price or CO₂ factor version of a model family
   uses that family's oldest version** instead of `0`. A family without any
   version still yields `0`. See decision 10.
@@ -36,23 +45,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   keeps the daily aggregation in memory instead of sorting the whole queried
   range.
 
-### Removed
+#### API
+
+- The provider usage response (`GET /api/usage/{provider}/v1`) names its
+  active-user count `activeUsersLast4Weeks`, as the frontend already expected;
+  the 0.x builds sent it as `activeUsersFor4Weeks`. All other response formats are
+  unchanged.
+
+#### Removed
 
 - Stored cost and CO₂ columns: `claude_usage_records.cost_usd_cent`,
   `claude_usage_records.co2_gram`, `copilot_usage_records.co2_gram` and
   `open_code_usage_records.co2_gram`.
 
-### Added
+#### Added
 
 - Unique constraints on `(model, valid_from)` for `claude_prices` and
   `co2_factors`. Two versions for the same model family and day would make the
   applied price or factor ambiguous.
 
-### Upgrading from 1.x
+### Frontend
+
+#### Changed
+
+- **New design.** An app shell with a sidebar that collapses to an icon rail,
+  the key figures as a band under the page title, a per-model table that can show
+  every token type, and a day/week switch for the history charts.
+- **Token figures count input and output only**, unless marked "incl. cache";
+  the FAQ explains why.
+- **The dashboard's own logo** is the favicon and stands next to the company
+  name; the neuland logo moved to the "A project by" credit.
+
+### Repository and deployment
+
+- **Backend and frontend live in one repository**, `backend/` and `frontend/`,
+  merged with both histories. The former `tokendashboard-backend` repository was
+  renamed and redirects here; `tokendashboard-frontend` is archived. See
+  [`docs/decisions.md`](docs/decisions.md).
+- **One CI workflow per side**, each running only when its folder changed, and one
+  shared devcontainer for both.
+- **`docker-compose.yml`** builds both images from the checkout and starts the whole
+  stack with a database, to try it out with a single command.
+
+### Upgrading from the 0.x builds
 
 - **Back up the database before upgrading.** The migrations drop the stored
-  cost and CO₂ columns; this cannot be undone. The REST API's response
-  formats are unchanged.
+  cost and CO₂ columns; this cannot be undone.
 - **The migration fails if `claude_prices` or `co2_factors` already contain
   duplicate versions.** Check for them before upgrading and remove the wrong
   rows:
