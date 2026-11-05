@@ -3,6 +3,8 @@
 Company-wide dashboard for token usage, estimated cost and estimated CO₂ emissions
 across AI providers (Claude Code, GitHub Copilot, OpenCode).
 
+![The dashboard's overview page with key figures for tokens, CO₂ and cost and a history chart by provider (demo data)](docs/images/dashboard-overview.png)
+
 | Folder | What | Docs |
 | --- | --- | --- |
 | [`backend/`](backend/) | Ktor/Kotlin API with PostgreSQL | [README](backend/README.md), [CONTRIBUTING](backend/CONTRIBUTING.md) |
