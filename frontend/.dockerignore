@@ -36,7 +36,6 @@ src/pages/__tests__
 
 # Docs and deployment examples
 *.md
-LICENSE
 examples
 .env.example
 Dockerfile

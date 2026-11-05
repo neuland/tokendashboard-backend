@@ -64,3 +64,8 @@ GitHub Actions runs [`.github/workflows/backend.yml`](.github/workflows/backend.
 and [`.github/workflows/frontend.yml`](.github/workflows/frontend.yml), each only when
 its folder changed. Neither builds or publishes an image — how and where the images are
 deployed is up to each installation (see the `examples/` folder on each side).
+
+## License
+
+MIT, see [LICENSE](LICENSE). The license does not cover the neuland name and logo, see
+[TRADEMARKS.md](TRADEMARKS.md). Security issues: see [SECURITY.md](SECURITY.md).

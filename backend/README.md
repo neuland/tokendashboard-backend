@@ -28,7 +28,7 @@ decision to introduce auth infrastructure.
 
 Anyone who can reach the service can submit usage data and read all
 aggregates, so the network boundary is the entire access control. See
-[SECURITY.md](SECURITY.md) for the full security model.
+[SECURITY.md](../SECURITY.md) for the full security model.
 
 ## CO₂ factors
 

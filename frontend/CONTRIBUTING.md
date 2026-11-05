@@ -62,4 +62,4 @@ review harder and should go in a separate PR.
 ## Reporting bugs / security issues
 
 Open an issue with steps to reproduce. For security-relevant findings, please
-avoid filing a public issue — see [SECURITY.md](SECURITY.md) instead.
+avoid filing a public issue — see [SECURITY.md](../SECURITY.md) instead.
