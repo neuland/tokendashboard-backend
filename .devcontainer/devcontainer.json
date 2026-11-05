@@ -2,7 +2,7 @@
     "name": "Tokendashboard - devcontainer",
     "dockerComposeFile": "docker-compose.yaml",
     "service": "dev",
-    "runServices": ["dev", "postgres"],
+    "runServices": ["dev", "postgres", "forward-stack", "forward-gradle"],
     "workspaceFolder": "/workspaces/tokendashboard",
     "initializeCommand": "${localWorkspaceFolder}/.devcontainer/init.sh",
     "overrideCommand": true,

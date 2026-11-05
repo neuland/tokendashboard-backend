@@ -7,6 +7,11 @@ services:
       - ..:/workspaces/tokendashboard
       - ~/.claude:/home/vscode/.claude
       - ~/.claude.json:/tmp/host-claude.json:ro
+    # For the forward-* services below, which share this container's network and with it
+    # its /etc/hosts. Docker Desktop knows host.docker.internal by itself, Docker on Linux
+    # needs this.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NODE_ENV=development
       # Backend tests use the postgres service below instead of starting one via
@@ -33,4 +38,29 @@ services:
       - POSTGRES_PASSWORD=test
     tmpfs:
       - /var/lib/postgresql/data
+    restart: unless-stopped
+
+  # The plugins' config lives in the mounted ~/.claude, so host and container share one
+  # --api-base-url. Inside the container, localhost is the container itself, so a backend
+  # on the host is out of reach and Claude Code's entries only get sent later from the
+  # host. These two forward localhost:8088 (the compose stack) and localhost:8080
+  # (`./gradlew run`) in this container to the same ports on the host, so the same URL
+  # works on both sides. network_mode puts them in the dev container's network, where
+  # their ports are its localhost. TCP6 with ipv6only=0 listens on IPv4 and IPv6, as
+  # localhost resolves to ::1 first here. Port 8080 is taken by this, so the backend
+  # can't be started with `./gradlew run` inside the container.
+  forward-stack:
+    image: alpine/socat:1.8.0.3
+    network_mode: "service:dev"
+    command: TCP6-LISTEN:8088,ipv6only=0,fork,reuseaddr TCP:host.docker.internal:8088
+    depends_on:
+      - dev
+    restart: unless-stopped
+
+  forward-gradle:
+    image: alpine/socat:1.8.0.3
+    network_mode: "service:dev"
+    command: TCP6-LISTEN:8080,ipv6only=0,fork,reuseaddr TCP:host.docker.internal:8080
+    depends_on:
+      - dev
     restart: unless-stopped

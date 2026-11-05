@@ -11,3 +11,6 @@
 /nginx
 /charts
 /deployment
+
+# Local settings for docker-compose.yml (DATABASE_PASSWORD, …)
+/.env

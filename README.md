@@ -35,23 +35,17 @@ in the shell or in a `.env` next to the file. Needs Docker Compose 2.23 or newer
 
 ### Claude Code in a devcontainer
 
-A devcontainer that mounts `~/.claude` (as the devcontainers of these repositories do)
-shares the Claude plugin's config and queue with the host, so both send to the same
-`--api-base-url`. With `http://localhost:8088` a session inside the container cannot
-reach the stack: there, `localhost` is the container itself. Its entries stay in the
-shared queue and are sent the next time a Claude Code session on the host starts or
-ends. Nothing is lost, but it shows up late, and not at all as long as Claude Code only
-runs in the container.
+Keep this in mind when trying it out with a local backend, whether started with
+`docker compose up` or with `./gradlew run` in `backend/`: if Claude Code runs in a
+devcontainer of your own that mounts `~/.claude`, it may not reach the backend, since
+`localhost` inside the container is the container itself. Nothing is lost, but the
+entries wait in the plugin's queue and are only sent the next time a Claude Code session
+on the host starts or ends.
 
-To have the container send right away, install the plugin with
-`--api-base-url http://host.docker.internal:8088` instead (`:8080` for a backend started
-with `./gradlew run` on the host). Docker Desktop resolves that name inside containers
-only, so it is then the other way round: sessions on the host stay in the queue until a
-session in the container starts or ends. As the config is shared, only one side can send
-directly.
-
-This only concerns a local backend: under a real hostname, as in a deployment, host and
-container reach the same address.
+This repository's [devcontainer](.devcontainer/) solves this with port forwarding:
+`localhost:8088` (the compose stack) and `localhost:8080` (`./gradlew run` on the host)
+inside the container lead to the host, so the same `--api-base-url` works on both sides.
+Port 8080 is therefore taken inside that container.
 
 ## Development
 
