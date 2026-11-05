@@ -1,24 +1,16 @@
-# TokenDashboard — Coding Agent Guide
+# tokendashboard (monorepo)
 
-Dashboard to display token usage across the company.
+Two independent subprojects, each with its own build, tests and CLAUDE.md:
 
-## Architecture
+- `backend/` — Ktor/Kotlin. Read [backend/CLAUDE.md](backend/CLAUDE.md) before working there.
+- `frontend/` — Astro + React. Read [frontend/CLAUDE.md](frontend/CLAUDE.md) before working there.
 
-See [architecture.md](.claude/system/architecture.md) for details.
+Domain language for both sides: [GLOSSARY.md](GLOSSARY.md). Repo-wide decisions (why a
+monorepo, CI layout): [docs/decisions.md](docs/decisions.md).
 
-## DDD
+Run every build, test and lint command from inside the subproject folder (`./gradlew`
+in `backend/`, `npm` in `frontend/`); there is no build at the root.
 
-See [ddd.md](.claude/system/ddd.md) for details.
-
-## Software quality
-
-See [codestyle.md](.claude/system/codestyle.md) for details.
-
-## Project specific
-
-See [project.md](.claude/project/project.md) for details.
-
-## Decisions
-
-See [decisions.md](docs/decisions.md) for fachliche/business decisions and their reasoning.
-
+The root holds only what is shared: `.devcontainer/` (one container for both),
+`justfile`, and `.github/workflows/` with one workflow per subproject. Each workflow
+runs only when its folder changed and sets `working-directory` to that folder.

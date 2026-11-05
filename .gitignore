@@ -1,46 +1,9 @@
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-.plans
-
-### IntelliJ IDEA ###
+# Subproject-specific ignores live in backend/.gitignore and frontend/.gitignore.
+.DS_Store
 .idea
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+.vscode/
 
-### Kotlin ###
-.kotlin
-
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-#infrastructure
+# Deployment config stays with each installation (see examples/ on each side)
 /kustomize
 /infrastructure
 /infra
@@ -49,8 +12,5 @@ bin/
 /charts
 /deployment
 
-### VS Code ###
-.vscode/
-
-### Mac OS ###
-.DS_Store
+# Local settings for docker-compose.yml (DATABASE_PASSWORD, …)
+/.env

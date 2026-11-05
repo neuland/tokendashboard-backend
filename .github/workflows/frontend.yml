@@ -1,0 +1,51 @@
+name: Frontend
+
+# Runs only when the frontend (or this workflow) changed; see docs/decisions.md.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+
+# A newer push to the same branch or PR cancels the run still going for the older one.
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      # The four gates from CONTRIBUTING.md. Lint and type-check are separate on
+      # purpose: ESLint is not type-aware, and neither `npm test` nor `npm run build`
+      # type-checks, so `astro check` is the only step that catches type errors.
+      - run: npm run lint
+      - run: npx astro check
+      - run: npm test
+
+      # Playwright's browser binary and its OS libraries live outside node_modules.
+      # The e2e specs stub /api via page.route, so no backend is needed; the
+      # `webServer` entry in playwright.config.ts starts `npm run dev` itself.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
