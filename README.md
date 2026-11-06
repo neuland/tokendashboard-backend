@@ -77,7 +77,9 @@ Port 8080 is therefore taken inside that container.
 
 Each side is built from its own folder (`./gradlew …` in `backend/`, `npm …` in
 `frontend/`). The [devcontainer](.devcontainer/) covers both (JDK 25, Node 24,
-Playwright); `just claude` starts Claude Code inside it.
+Playwright); `just claude` starts Claude Code inside it. Start it only that way: the
+justfile names the container after the checkout's folder, so opening `.devcontainer/`
+directly from an IDE doesn't work.
 
 ## CI
 

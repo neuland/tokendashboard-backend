@@ -22,9 +22,6 @@ export default defineConfig({
   integrations: [react()],
   devToolbar: { enabled: false },
   base: '/',
-  // Bind the dev server to all interfaces, not just localhost inside the container,
-  // so it's reachable from the host through the devcontainer's port mapping.
-  server: { host: true },
   i18n: {
     defaultLocale: 'de',
     locales: ['de', 'en'],
