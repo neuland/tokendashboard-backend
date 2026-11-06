@@ -1,6 +1,11 @@
-# The whole stack, built from this checkout, to try it out in one go:
+# The whole stack, to try it out in one go:
 #
-#   docker compose up --build      →  http://localhost:8088
+#   docker compose up      →  http://localhost:8088
+#
+# On its own this file runs the published images, so it works without the source code
+# (each release attaches a copy pinned to its version). In a checkout, Compose also reads
+# docker-compose.override.yml, which builds both images from the source instead;
+# `docker compose -f docker-compose.yml up` skips it and runs the published images there too.
 #
 # Not for development: backend/docker-compose.yml starts only the database for that.
 # Both can run side by side — nothing here is published except the frontend's port.
@@ -27,7 +32,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./backend
+    image: ghcr.io/neuland/tokendashboard/backend:${TOKENDASHBOARD_VERSION:-latest}
     environment:
       DATABASE_URL: jdbc:postgresql://postgres:5432/tokendashboard
       DATABASE_USER: tokendashboard
@@ -39,10 +44,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        PUBLIC_COMPANY_NAME: ${PUBLIC_COMPANY_NAME:-}
+    image: ghcr.io/neuland/tokendashboard/frontend:${TOKENDASHBOARD_VERSION:-latest}
     ports:
       - "${TOKENDASHBOARD_PORT:-8088}:80"
     # Replaces the image's own nginx config: serves the static site and forwards /api to

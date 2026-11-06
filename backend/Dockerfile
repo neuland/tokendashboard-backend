@@ -1,4 +1,7 @@
-FROM eclipse-temurin:25-jdk AS builder
+# The jar is the same on every platform, so the builder always runs natively on the build
+# machine ($BUILDPLATFORM); only the runtime stage below is built per target platform.
+# Without this, a multi-platform build would run Gradle under emulation.
+FROM --platform=$BUILDPLATFORM eclipse-temurin:25-jdk AS builder
 
 WORKDIR /app
 

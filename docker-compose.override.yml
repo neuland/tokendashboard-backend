@@ -1,0 +1,19 @@
+# Read automatically next to docker-compose.yml, so it only takes effect in a checkout:
+# builds both images from the source instead of pulling the published ones.
+#
+#   docker compose up --build
+#
+# Local image names, so a source build never overwrites a pulled release image.
+services:
+  backend:
+    image: tokendashboard-stack/backend:local
+    build: ./backend
+
+  frontend:
+    image: tokendashboard-stack/frontend:local
+    build:
+      context: ./frontend
+      args:
+        # Baked into the static build; the published image has none (the sidebar then
+        # shows "neuland"). Set it in the shell or in a .env next to this file.
+        PUBLIC_COMPANY_NAME: ${PUBLIC_COMPANY_NAME:-}

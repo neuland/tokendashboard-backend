@@ -154,8 +154,10 @@ The production build emits a fully static site into `dist/`, served by
 - **CI:** the GitHub Actions workflow in
   [`.github/workflows/frontend.yml`](../.github/workflows/frontend.yml) at the root of
   the monorepo runs lint, type-check, unit and e2e tests on every push to `main` and
-  every pull request that changes `frontend/`. It does not build or
-  publish an image — how and where the image is deployed is up to each installation.
+  every pull request that changes `frontend/`. Images are published per release by the
+  root [`release.yml`](../.github/workflows/release.yml), as
+  `ghcr.io/neuland/tokendashboard/frontend`, without a company name; how and where the
+  image is deployed is up to each installation.
 - **Deployment examples:** [`examples/`](examples/) holds generic, placeholder-valued
   starting points for your own pipeline — a GitLab CI pipeline
   ([`examples/gitlab-ci.yml`](examples/gitlab-ci.yml)) that builds the image, pushes it
