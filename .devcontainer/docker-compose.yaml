@@ -4,7 +4,8 @@ services:
       context: .
     hostname: dev
     volumes:
-      - ..:/workspaces/tokendashboard
+      # Same path as workspaceFolder in devcontainer.json (see devcontainer_name in the justfile).
+      - ..:/workspaces/${COMPOSE_PROJECT_NAME}
       - ~/.claude:/home/vscode/.claude
       - ~/.claude.json:/tmp/host-claude.json:ro
     # For the forward-* services below, which share this container's network and with it
@@ -20,8 +21,6 @@ services:
       - POSTGRES_DB=testdb
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
-    ports:
-      - "4321:4321"
     depends_on:
       - postgres
     command: sleep infinity

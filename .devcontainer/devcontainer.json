@@ -1,9 +1,11 @@
 {
-    "name": "Tokendashboard - devcontainer",
+    // COMPOSE_PROJECT_NAME comes from the justfile, so this devcontainer only works when
+    // started through it (`just claude`), not opened directly from an IDE.
+    "name": "${localEnv:COMPOSE_PROJECT_NAME}",
     "dockerComposeFile": "docker-compose.yaml",
     "service": "dev",
     "runServices": ["dev", "postgres", "forward-stack", "forward-gradle"],
-    "workspaceFolder": "/workspaces/tokendashboard",
+    "workspaceFolder": "/workspaces/${localEnv:COMPOSE_PROJECT_NAME}",
     "initializeCommand": "${localWorkspaceFolder}/.devcontainer/init.sh",
     "overrideCommand": true,
     "features": {
