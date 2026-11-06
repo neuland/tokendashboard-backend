@@ -1,4 +1,5 @@
-name: Release
+name: "Release: publish images and GitHub Release"
+run-name: Release ${{ github.ref_name }}
 
 # A release is a vX.Y.Z tag on a commit in main. This publishes both images to the GitHub
 # Container Registry and creates the GitHub Release with the changelog section and a
@@ -13,6 +14,7 @@ permissions:
 
 jobs:
   check:
+    name: Check tag, versions and changelog
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -80,6 +82,7 @@ jobs:
           if-no-files-found: error
 
   images:
+    name: Publish ${{ matrix.image }} image
     needs: check
     runs-on: ubuntu-latest
     strategy:
@@ -120,6 +123,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
 
   github-release:
+    name: Create GitHub Release
     needs: [check, images]
     runs-on: ubuntu-latest
     env:
