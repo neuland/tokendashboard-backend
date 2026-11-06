@@ -1,4 +1,4 @@
-name: Frontend
+name: "Frontend: lint and test"
 
 # Runs only when the frontend (or this workflow) changed; see docs/decisions.md.
 on:
@@ -23,6 +23,7 @@ defaults:
 
 jobs:
   test:
+    name: Frontend lint, type-check and test
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

@@ -1,4 +1,4 @@
-name: Backend
+name: "Backend: lint and test"
 
 # Runs only when the backend (or this workflow) changed; see docs/decisions.md.
 on:
@@ -17,6 +17,7 @@ defaults:
 
 jobs:
   test:
+    name: Backend lint and test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
