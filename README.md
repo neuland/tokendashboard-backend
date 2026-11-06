@@ -22,16 +22,37 @@ side.
 
 ## Try it out
 
-[`docker-compose.yml`](docker-compose.yml) builds both images from this checkout and
-starts them with a database:
+### Using the prebuilt images
+
+Each [release](https://github.com/neuland/tokendashboard/releases) publishes both images
+(amd64 and arm64) and attaches a `docker-compose.yml` that starts them with a database:
+
+```bash
+curl -LO https://github.com/neuland/tokendashboard/releases/latest/download/docker-compose.yml
+docker compose up
+```
+
+The dashboard then runs on <http://localhost:8088>. Needs Docker and Docker Compose 2.23
+or newer. That file runs the images of its own release; `TOKENDASHBOARD_VERSION=1.0.0`
+picks another one, `DATABASE_PASSWORD` and `TOKENDASHBOARD_PORT` change the database
+password and the port. Set them in the shell or in a `.env` next to the file.
+
+The published frontend image carries no company name (the sidebar shows "neuland"). It
+is baked into the static build, so setting one means building the image yourself, see
+below.
+
+### Building from source
 
 ```bash
 docker compose up --build
 ```
 
-The dashboard then runs on <http://localhost:8088>. `PUBLIC_COMPANY_NAME`,
-`DATABASE_PASSWORD` and `TOKENDASHBOARD_PORT` can be set in the shell or in a `.env`
-next to the file. Needs Docker Compose 2.23 or newer.
+Here Compose also reads [`docker-compose.override.yml`](docker-compose.override.yml),
+which builds both images from the source instead of pulling them, and
+`PUBLIC_COMPANY_NAME` in the shell or in a `.env` sets the company name.
+`docker compose -f docker-compose.yml up` runs the published images instead.
+
+### Then install a plugin
 
 The dashboard stays empty until at least one plugin sends data, so install one next.
 Copy the install command from the dashboard itself, under "Install plugins" in the
@@ -62,8 +83,35 @@ Playwright); `just claude` starts Claude Code inside it.
 
 GitHub Actions runs [`.github/workflows/backend.yml`](.github/workflows/backend.yml)
 and [`.github/workflows/frontend.yml`](.github/workflows/frontend.yml), each only when
-its folder changed. Neither builds or publishes an image — how and where the images are
-deployed is up to each installation (see the `examples/` folder on each side).
+its folder changed. A `vX.Y.Z` tag on `main` runs
+[`.github/workflows/release.yml`](.github/workflows/release.yml): it first checks that
+the tag is on `main`, matches the versions in `backend/build.gradle.kts` and
+`frontend/package.json` and has a section in `CHANGELOG.md`, and only then publishes both
+images to `ghcr.io/neuland/tokendashboard/backend` and `…/frontend` and creates the
+GitHub Release with the changelog section and the pinned `docker-compose.yml`. How and
+where the images are deployed is up to each installation (see the `examples/` folder on
+each side).
+
+## Releasing
+
+Backend and frontend share one version and are released together.
+
+1. Set the version in both build files: `version = "1.1.0"` in
+   `backend/build.gradle.kts`, and in `frontend/`
+   `npm version 1.1.0 --no-git-tag-version` (updates `package.json` and
+   `package-lock.json`, without a commit or tag).
+2. Add a `## [1.1.0] - YYYY-MM-DD` section to [`CHANGELOG.md`](CHANGELOG.md). It becomes
+   the text of the GitHub Release.
+3. Commit, merge into `main`, then tag that commit and push the tag:
+   `git tag v1.1.0 && git push origin v1.1.0`.
+
+Steps 1 and 2 can also be left to Claude Code: the `release` skill
+([`.claude/skills/release/`](.claude/skills/release/SKILL.md)) sets the version, writes
+the changelog section from the commits since the last release and runs the checks of
+`release.yml`. It stops before commit and tag.
+
+A version with a suffix (`1.1.0-rc.1`) becomes a pre-release: its images get only that
+tag, not `1.1`, `1` or `latest`.
 
 ## License
 

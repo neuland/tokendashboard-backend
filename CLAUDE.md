@@ -12,5 +12,6 @@ Run every build, test and lint command from inside the subproject folder (`./gra
 in `backend/`, `npm` in `frontend/`); there is no build at the root.
 
 The root holds only what is shared: `.devcontainer/` (one container for both),
-`justfile`, and `.github/workflows/` with one workflow per subproject. Each workflow
-runs only when its folder changed and sets `working-directory` to that folder.
+`justfile`, `.claude/skills/` (`release`) and `.github/workflows/` with one workflow per subproject plus `release.yml`.
+Each subproject workflow runs only when its folder changed and sets `working-directory`
+to that folder.

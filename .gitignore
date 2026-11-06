@@ -1,6 +1,7 @@
 # Subproject-specific ignores live in backend/.gitignore and frontend/.gitignore.
 .DS_Store
 .idea
+*.iml
 .vscode/
 
 # Deployment config stays with each installation (see examples/ on each side)

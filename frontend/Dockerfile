@@ -1,4 +1,7 @@
-FROM node:24-alpine AS builder
+# The static site is the same on every platform, so the builder always runs natively on
+# the build machine ($BUILDPLATFORM); only the nginx stage below is built per target
+# platform. Without this, a multi-platform build would run npm under emulation.
+FROM --platform=$BUILDPLATFORM node:24-alpine AS builder
 WORKDIR /app
 
 # PUBLIC_* values are baked into the static build, so they have to be known here, not

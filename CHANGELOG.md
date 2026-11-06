@@ -8,7 +8,7 @@ Backend and frontend share one version and are released together; each release i
 `vX.Y.Z` tag on `main`. Decisions referenced below live in
 [`backend/docs/decisions.md`](backend/docs/decisions.md) unless noted otherwise.
 
-## [1.0.0] - Unreleased
+## [1.0.0] - 2026-11-06
 
 The first release. Earlier states of the two former repositories were development
 builds (0.x) without a release.
@@ -84,8 +84,14 @@ builds (0.x) without a release.
   [`docs/decisions.md`](docs/decisions.md).
 - **One CI workflow per side**, each running only when its folder changed, and one
   shared devcontainer for both.
-- **`docker-compose.yml`** builds both images from the checkout and starts the whole
-  stack with a database, to try it out with a single command.
+- **Published images** for every release, for amd64 and arm64:
+  `ghcr.io/neuland/tokendashboard/backend` and `ghcr.io/neuland/tokendashboard/frontend`,
+  tagged `X.Y.Z`, `X.Y`, `X` and `latest`. The frontend image carries no company name;
+  set one by building it yourself (`PUBLIC_COMPANY_NAME`).
+- **`docker-compose.yml`** starts the whole stack with a database in one command. On
+  its own it runs the published images, so trying the dashboard needs no source code;
+  each GitHub Release attaches a copy pinned to its version. In a checkout,
+  `docker-compose.override.yml` builds both images from the source instead.
 
 ### Upgrading from the 0.x builds
 
